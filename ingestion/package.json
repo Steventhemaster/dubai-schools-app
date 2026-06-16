@@ -1,0 +1,28 @@
+{
+  "name": "dubai-schools-ingestion",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "KHDA / Dubai Pulse data ingestion pipeline for the Dubai Schools app",
+  "scripts": {
+    "ingest": "tsx src/index.ts",
+    "ingest:csv": "tsx src/index.ts --source=csv",
+    "ingest:dubaipulse": "tsx src/index.ts --source=dubaipulse",
+    "ingest:khda": "tsx src/index.ts --source=khda",
+    "merge:fees": "tsx src/mergeFees.ts",
+    "describe": "tsx src/index.ts --describe",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.45.4",
+    "csv-parse": "^5.5.6",
+    "dotenv": "^16.4.5",
+    "exceljs": "^4.4.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.16.2",
+    "typescript": "~5.4.5"
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Dubai Schools",
+    "slug": "dubai-schools-app",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "dubaischools",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0A3D62"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "ae.dubaischools.app",
+      "infoPlist": {
+        "CFBundleAllowMixedLocalizations": true
+      }
+    },
+    "android": {
+      "package": "ae.dubaischools.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A3D62"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "locales": {
+      "en": "./src/i18n/store/en.json",
+      "ar": "./src/i18n/store/ar.json"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-localization",
+      "expo-asset",
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "supabaseUrl": "https://YOUR_PROJECT.supabase.co",
+      "supabaseAnonKey": "YOUR_ANON_KEY"
+    }
+  }
+}

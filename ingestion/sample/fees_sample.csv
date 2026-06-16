@@ -1,0 +1,5 @@
+school_name,fee_min_aed,fee_max_aed,fee_bands,fees_source
+GEMS Wellington Academy - Silicon Oasis,38000,75000,"[{""grade"":""FS1"",""annualAed"":38000},{""grade"":""Year 7"",""annualAed"":60000},{""grade"":""Year 12"",""annualAed"":75000}]",prospectus-2025
+Dubai American Academy,55000,98000,"[{""grade"":""KG1"",""annualAed"":55000},{""grade"":""Grade 12"",""annualAed"":98000}]",prospectus-2025
+GEMS Modern Academy,18000,42000,,prospectus-2025
+Al Noor Girls School,12000,28000,,community

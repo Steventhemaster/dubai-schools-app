@@ -1,0 +1,33 @@
+# DigitalOcean App Platform — static site spec for Dubai Schools (Expo web).
+# Use via: doctl apps create --spec .do/app.yaml
+# …or just mirror these settings in the DO web UI (see docs/DEPLOY_DIGITALOCEAN.md).
+#
+# Edit `repo` to your GitHub "<username>/<repo>" before deploying.
+name: dubai-schools
+region: fra   # Frankfurt — lowest latency to Dubai among DO regions (also: blr=Bangalore)
+
+static_sites:
+  - name: web
+    github:
+      repo: YOUR_GITHUB_USERNAME/dubai-schools-app
+      branch: main
+      deploy_on_push: true
+
+    # Expo web static export. DO auto-detects the Node buildpack from package.json.
+    build_command: npx expo export -p web
+    output_dir: dist
+
+    # SPA fallback: dynamic routes (/school/<id>) have no matching file, so serve
+    # the app shell and let expo-router resolve the path client-side.
+    catchall_document: index.html
+
+    # Build-time env vars baked into the JS bundle.
+    # The anon key is a PUBLIC client key by design (RLS is the real boundary),
+    # so it is safe to keep here. NEVER put the service_role key in this file.
+    envs:
+      - key: EXPO_PUBLIC_SUPABASE_URL
+        scope: BUILD_TIME
+        value: https://dmifcaxitaqdeojgnfci.supabase.co
+      - key: EXPO_PUBLIC_SUPABASE_ANON_KEY
+        scope: BUILD_TIME
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtaWZjYXhpdGFxZGVvamduZmNpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODExNjk0MTIsImV4cCI6MjA5Njc0NTQxMn0.nrL8ymH4CgYu-gPq40ImlU-bAOKG7Sa5J4WSDIcU75g
