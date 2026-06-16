@@ -9,7 +9,7 @@ region: fra   # Frankfurt — lowest latency to Dubai among DO regions (also: bl
 static_sites:
   - name: web
     github:
-      repo: YOUR_GITHUB_USERNAME/dubai-schools-app
+      repo: Steventhemaster/dubai-schools-app
       branch: main
       deploy_on_push: true
 
