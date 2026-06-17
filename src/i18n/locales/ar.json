@@ -16,7 +16,11 @@
     "topRated": "الأعلى تقييماً في دبي",
     "sortRating": "الأعلى تقييماً",
     "sortFees": "الأقل رسوماً",
-    "allSchools": "جميع المدارس"
+    "allSchools": "جميع المدارس",
+    "viewList": "قائمة",
+    "viewMap": "خريطة",
+    "mapNativeTitle": "عرض الخريطة متاح على الويب",
+    "mapNativeBody": "{{count}} مدرسة معروضة على الخريطة في نسخة الويب. دعم الخريطة على التطبيق قريباً."
   },
   "filter": {
     "curriculum": "المنهج",

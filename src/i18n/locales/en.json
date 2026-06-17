@@ -16,7 +16,11 @@
     "topRated": "Top rated in Dubai",
     "sortRating": "Top rated",
     "sortFees": "Lowest fees",
-    "allSchools": "All schools"
+    "allSchools": "All schools",
+    "viewList": "List",
+    "viewMap": "Map",
+    "mapNativeTitle": "Map view is on the web app",
+    "mapNativeBody": "{{count}} schools are mapped on the web version. Native map support is coming soon."
   },
   "filter": {
     "curriculum": "Curriculum",

@@ -6,6 +6,7 @@ import {
   StyleSheet,
   Text,
   TextInput,
+  useWindowDimensions,
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -14,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SchoolCard, SchoolMiniCard } from '@/components/SchoolCard';
 import { SchoolCardSkeleton } from '@/components/Skeleton';
+import { SchoolMap } from '@/components/SchoolMap';
 import { Chip } from '@/components/FilterChips';
 import { PickerSheet } from '@/components/PickerSheet';
 import { listSchools } from '@/lib/repository';
@@ -22,6 +24,7 @@ import { font, radius, spacing, useTheme, type ThemeColors } from '@/theme';
 
 type SortKey = 'rating' | 'fees' | null;
 type SheetKey = 'curriculum' | 'area' | null;
+type ViewMode = 'list' | 'map';
 
 export default function SchoolsScreen() {
   const { t } = useTranslation();
@@ -33,6 +36,8 @@ export default function SchoolsScreen() {
   const [filter, setFilter] = useState<SchoolFilter>({});
   const [sort, setSort] = useState<SortKey>(null);
   const [sheet, setSheet] = useState<SheetKey>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const { height: winH } = useWindowDimensions();
 
   const load = useCallback(async () => {
     const data = await listSchools();
@@ -102,7 +107,7 @@ export default function SchoolsScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.bg }]} edges={['top']}>
       <FlatList
-        data={loading ? [] : results}
+        data={loading || viewMode === 'map' ? [] : results}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => <SchoolCard school={item} />}
         contentContainerStyle={styles.listContent}
@@ -206,7 +211,24 @@ export default function SchoolsScreen() {
               />
             </View>
 
-            {showRail && (
+            <View style={[styles.segment, { borderColor: c.border, backgroundColor: c.surface }]}>
+              <SegBtn
+                icon="list"
+                label={t('home.viewList')}
+                active={viewMode === 'list'}
+                onPress={() => setViewMode('list')}
+                c={c}
+              />
+              <SegBtn
+                icon="map"
+                label={t('home.viewMap')}
+                active={viewMode === 'map'}
+                onPress={() => setViewMode('map')}
+                c={c}
+              />
+            </View>
+
+            {showRail && viewMode === 'list' && (
               <View style={styles.rail}>
                 <Text style={[styles.sectionTitle, { color: c.text }]}>
                   {t('home.topRated')}
@@ -234,6 +256,15 @@ export default function SchoolsScreen() {
               <SchoolCardSkeleton />
               <SchoolCardSkeleton />
               <SchoolCardSkeleton />
+            </View>
+          ) : viewMode === 'map' ? (
+            <View
+              style={[
+                styles.mapWrap,
+                { height: Math.max(360, winH * 0.62), borderColor: c.border },
+              ]}
+            >
+              <SchoolMap schools={results} />
             </View>
           ) : (
             <View style={styles.empty}>
@@ -306,6 +337,34 @@ function FilterButton({
   );
 }
 
+function SegBtn({
+  icon,
+  label,
+  active,
+  onPress,
+  c,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  active: boolean;
+  onPress: () => void;
+  c: ThemeColors;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[styles.seg, active && { backgroundColor: c.primary }]}
+    >
+      <Ionicons name={icon} size={15} color={active ? c.textInverse : c.textMuted} />
+      <Text
+        style={[styles.segText, { color: active ? c.textInverse : c.textMuted }]}
+      >
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { padding: spacing.lg, paddingTop: spacing.md },
@@ -337,6 +396,30 @@ const styles = StyleSheet.create({
   },
   filterBtnText: { flex: 1, fontSize: font.small, fontWeight: '600' },
   sortRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
+  segment: {
+    flexDirection: 'row',
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: 3,
+    marginTop: spacing.md,
+    gap: 3,
+  },
+  seg: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.sm,
+  },
+  segText: { fontSize: font.small, fontWeight: '700' },
+  mapWrap: {
+    borderWidth: 1,
+    borderRadius: radius.lg,
+    overflow: 'hidden',
+    marginTop: spacing.sm,
+  },
   rail: { marginTop: spacing.lg },
   sectionTitle: { fontSize: font.h3, fontWeight: '700', marginBottom: spacing.md },
   count: {
