@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   FlatList,
+  Pressable,
   RefreshControl,
   StyleSheet,
   Text,
@@ -13,13 +14,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { SchoolCard, SchoolMiniCard } from '@/components/SchoolCard';
 import { SchoolCardSkeleton } from '@/components/Skeleton';
-import { Chip, FilterChips } from '@/components/FilterChips';
+import { Chip } from '@/components/FilterChips';
+import { PickerSheet } from '@/components/PickerSheet';
 import { listSchools } from '@/lib/repository';
 import type { School, SchoolFilter } from '@/lib/types';
-import { font, radius, spacing, useTheme } from '@/theme';
+import { font, radius, spacing, useTheme, type ThemeColors } from '@/theme';
 
-const CURRICULA = ['British', 'American', 'IB', 'Indian (CBSE)', 'French'];
 type SortKey = 'rating' | 'fees' | null;
+type SheetKey = 'curriculum' | 'area' | null;
 
 export default function SchoolsScreen() {
   const { t } = useTranslation();
@@ -30,6 +32,7 @@ export default function SchoolsScreen() {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState<SchoolFilter>({});
   const [sort, setSort] = useState<SortKey>(null);
+  const [sheet, setSheet] = useState<SheetKey>(null);
 
   const load = useCallback(async () => {
     const data = await listSchools();
@@ -46,10 +49,14 @@ export default function SchoolsScreen() {
     setRefreshing(false);
   }, [load]);
 
-  // Area options come from the loaded data so they work in both demo and
-  // Supabase modes (the #1 decision for relocating parents is the area).
+  // Filter options come from the loaded data so they reflect what's actually
+  // present (78 Dubai areas → a searchable picker, not a chip row).
   const areas = useMemo(
     () => Array.from(new Set(all.map((s) => s.area))).sort(),
+    [all]
+  );
+  const curricula = useMemo(
+    () => Array.from(new Set(all.map((s) => s.curriculum))).sort(),
     [all]
   );
 
@@ -141,20 +148,22 @@ export default function SchoolsScreen() {
               )}
             </View>
 
-            <FilterChips
-              allLabel={t('filter.all')}
-              options={CURRICULA.map((cur) => ({ label: cur, value: cur }))}
-              selected={filter.curriculum}
-              onSelect={(v) => setFilter((f) => ({ ...f, curriculum: v as any }))}
-            />
-            {areas.length > 1 && (
-              <FilterChips
-                allLabel={`📍 ${t('filter.area')}`}
-                options={areas.map((a) => ({ label: a, value: a }))}
-                selected={filter.area}
-                onSelect={(v) => setFilter((f) => ({ ...f, area: v }))}
+            <View style={styles.filterRow}>
+              <FilterButton
+                icon="book-outline"
+                label={t('filter.curriculum')}
+                value={filter.curriculum}
+                onPress={() => setSheet('curriculum')}
+                c={c}
               />
-            )}
+              <FilterButton
+                icon="location-outline"
+                label={t('filter.area')}
+                value={filter.area}
+                onPress={() => setSheet('area')}
+                c={c}
+              />
+            </View>
 
             <View style={styles.sortRow}>
               <Chip
@@ -236,7 +245,64 @@ export default function SchoolsScreen() {
           )
         }
       />
+
+      <PickerSheet
+        visible={sheet === 'curriculum'}
+        title={t('filter.curriculum')}
+        allLabel={t('filter.allCurricula')}
+        options={curricula}
+        selected={filter.curriculum}
+        onSelect={(v) => setFilter((f) => ({ ...f, curriculum: v as any }))}
+        onClose={() => setSheet(null)}
+      />
+      <PickerSheet
+        visible={sheet === 'area'}
+        title={t('filter.area')}
+        allLabel={t('filter.allAreas')}
+        options={areas}
+        selected={filter.area}
+        searchable
+        onSelect={(v) => setFilter((f) => ({ ...f, area: v }))}
+        onClose={() => setSheet(null)}
+      />
     </SafeAreaView>
+  );
+}
+
+function FilterButton({
+  icon,
+  label,
+  value,
+  onPress,
+  c,
+}: {
+  icon: keyof typeof Ionicons.glyphMap;
+  label: string;
+  value?: string;
+  onPress: () => void;
+  c: ThemeColors;
+}) {
+  const active = !!value;
+  return (
+    <Pressable
+      onPress={onPress}
+      style={[
+        styles.filterBtn,
+        {
+          borderColor: active ? c.primary : c.border,
+          backgroundColor: active ? c.primarySoft : c.surface,
+        },
+      ]}
+    >
+      <Ionicons name={icon} size={15} color={active ? c.primary : c.textMuted} />
+      <Text
+        numberOfLines={1}
+        style={[styles.filterBtnText, { color: active ? c.primary : c.text }]}
+      >
+        {value ?? label}
+      </Text>
+      <Ionicons name="chevron-down" size={15} color={active ? c.primary : c.textMuted} />
+    </Pressable>
   );
 }
 
@@ -258,6 +324,18 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   searchInput: { flex: 1, fontSize: font.body, paddingVertical: 2 },
+  filterRow: { flexDirection: 'row', gap: spacing.sm },
+  filterBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm + 2,
+  },
+  filterBtnText: { flex: 1, fontSize: font.small, fontWeight: '600' },
   sortRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
   rail: { marginTop: spacing.lg },
   sectionTitle: { fontSize: font.h3, fontWeight: '700', marginBottom: spacing.md },

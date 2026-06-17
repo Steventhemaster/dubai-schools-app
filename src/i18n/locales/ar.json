@@ -23,7 +23,9 @@
     "gender": "الجنس",
     "area": "المنطقة",
     "vacancyOnly": "يوجد مقاعد شاغرة",
-    "all": "الكل"
+    "all": "الكل",
+    "allCurricula": "جميع المناهج",
+    "allAreas": "جميع المناطق"
   },
   "school": {
     "overview": "نظرة عامة",
@@ -124,6 +126,7 @@
   "common": {
     "loading": "جارٍ التحميل…",
     "retry": "إعادة المحاولة",
+    "search": "بحث",
     "share": "مشاركة",
     "today": "اليوم",
     "yesterday": "أمس",

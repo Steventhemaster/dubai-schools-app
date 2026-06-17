@@ -23,7 +23,9 @@
     "gender": "Gender",
     "area": "Area",
     "vacancyOnly": "Has vacancy",
-    "all": "All"
+    "all": "All",
+    "allCurricula": "All curricula",
+    "allAreas": "All areas"
   },
   "school": {
     "overview": "Overview",
@@ -124,6 +126,7 @@
   "common": {
     "loading": "Loading…",
     "retry": "Retry",
+    "search": "Search",
     "share": "Share",
     "today": "today",
     "yesterday": "yesterday",
