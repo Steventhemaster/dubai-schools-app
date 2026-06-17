@@ -1,5 +1,0 @@
-# Cloudflare Pages SPA fallback.
-# Real files (/, /auth.html, /profile.html, _expo/*, assets/*) are served as-is;
-# unmatched paths like /school/<id> fall through to the app shell, which
-# expo-router then resolves client-side.
-/*    /index.html   200
