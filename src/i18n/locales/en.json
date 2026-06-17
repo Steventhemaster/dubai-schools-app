@@ -115,6 +115,9 @@
     "gender_undisclosed": "Prefer not to say",
     "phone": "Phone",
     "errorProfile": "Please fill in your name, gender and phone.",
+    "errorConsent": "Please accept the Terms and Privacy Policy.",
+    "consentPre": "I agree to the",
+    "consentAnd": "and",
     "switchToUp": "New here? Create an account",
     "switchToIn": "Already have an account? Sign in",
     "checkEmail": "Check your email to confirm your account.",
@@ -129,9 +132,16 @@
     "empty": "You haven't saved any schools yet.",
     "hint": "Tap the bookmark on a school to save it here."
   },
+  "legal": {
+    "privacyTitle": "Privacy Policy",
+    "termsTitle": "Terms of Service",
+    "effective": "Effective",
+    "draftNote": "This is a working draft. Have a UAE-qualified lawyer review before public launch. Bracketed items must be completed."
+  },
   "profile": {
     "title": "Profile",
     "account": "Account",
+    "legal": "Legal",
     "appearance": "Appearance",
     "appearanceAuto": "Automatic — follows your device's light/dark setting",
     "language": "Language",

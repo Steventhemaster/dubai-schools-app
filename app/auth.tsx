@@ -31,6 +31,7 @@ export default function AuthScreen() {
   const [lastName, setLastName] = useState('');
   const [gender, setGender] = useState<'male' | 'female' | 'undisclosed' | ''>('');
   const [phone, setPhone] = useState('');
+  const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -45,6 +46,10 @@ export default function AuthScreen() {
       (!firstName.trim() || !lastName.trim() || !gender || !phone.trim())
     ) {
       setError(t('auth.errorProfile'));
+      return;
+    }
+    if (mode === 'signup' && !agreed) {
+      setError(t('auth.errorConsent'));
       return;
     }
     setError(null);
@@ -188,6 +193,32 @@ export default function AuthScreen() {
           placeholderTextColor={c.textMuted}
         />
 
+        {mode === 'signup' && (
+          <Pressable style={styles.consentRow} onPress={() => setAgreed(!agreed)}>
+            <Ionicons
+              name={agreed ? 'checkbox' : 'square-outline'}
+              size={22}
+              color={agreed ? c.primary : c.textMuted}
+            />
+            <Text style={[styles.consentText, { color: c.textMuted }]}>
+              {t('auth.consentPre')}{' '}
+              <Text
+                style={{ color: c.primary, fontWeight: '700' }}
+                onPress={() => router.push('/legal/terms')}
+              >
+                {t('legal.termsTitle')}
+              </Text>
+              {' '}{t('auth.consentAnd')}{' '}
+              <Text
+                style={{ color: c.primary, fontWeight: '700' }}
+                onPress={() => router.push('/legal/privacy')}
+              >
+                {t('legal.privacyTitle')}
+              </Text>
+            </Text>
+          </Pressable>
+        )}
+
         {!!error && <Text style={[styles.error, { color: c.danger }]}>{error}</Text>}
         {!!info && <Text style={[styles.info, { color: c.success }]}>{info}</Text>}
 
@@ -236,6 +267,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   genderText: { fontSize: font.small, fontWeight: '600' },
+  consentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.sm,
+    marginTop: spacing.lg,
+  },
+  consentText: { flex: 1, fontSize: font.small, lineHeight: 19 },
   iconWrap: {
     width: 72,
     height: 72,

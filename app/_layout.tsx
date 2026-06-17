@@ -36,6 +36,8 @@ export default function RootLayout() {
               name="auth"
               options={{ presentation: 'modal', title: '' }}
             />
+            <Stack.Screen name="legal/privacy" options={{ title: '' }} />
+            <Stack.Screen name="legal/terms" options={{ title: '' }} />
           </Stack>
         </SavedSchoolsProvider>
         </AuthProvider>

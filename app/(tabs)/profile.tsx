@@ -93,6 +93,27 @@ export default function ProfileScreen() {
           </Text>
         </Section>
 
+        <Section title={t('profile.legal')} icon="document-text-outline">
+          <Pressable
+            style={styles.linkRow}
+            onPress={() => router.push('/legal/privacy')}
+          >
+            <Text style={[styles.linkText, { color: c.primary }]}>
+              {t('legal.privacyTitle')}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={c.textMuted} />
+          </Pressable>
+          <Pressable
+            style={styles.linkRow}
+            onPress={() => router.push('/legal/terms')}
+          >
+            <Text style={[styles.linkText, { color: c.primary }]}>
+              {t('legal.termsTitle')}
+            </Text>
+            <Ionicons name="chevron-forward" size={16} color={c.textMuted} />
+          </Pressable>
+        </Section>
+
         <Section title={t('profile.about')} icon="information-circle-outline">
           <Text style={[styles.body, { color: c.textMuted }]}>
             {t('profile.aboutText')}
@@ -163,4 +184,11 @@ const styles = StyleSheet.create({
   },
   signInText: { fontWeight: '700', fontSize: font.small },
   deleteText: { fontSize: font.small, fontWeight: '600' },
+  linkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: spacing.sm,
+  },
+  linkText: { fontSize: font.body, fontWeight: '600' },
 });
