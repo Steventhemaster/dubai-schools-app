@@ -25,6 +25,7 @@ import { RatingStars } from '@/components/RatingStars';
 import { RatingSummary } from '@/components/RatingSummary';
 import { useSavedSchools } from '@/components/useSavedSchools';
 import { useAuth } from '@/lib/auth';
+import { schoolSummary } from '@/lib/summary';
 import { getSchool, listReviews, reportReview } from '@/lib/repository';
 import type { Review, School } from '@/lib/types';
 import { feeRangeLabel, formatAed, relativeDate } from '@/lib/format';
@@ -178,11 +179,11 @@ export default function SchoolDetailScreen() {
 
 function Overview({ school, c }: { school: School; c: ThemeColors }) {
   const { t } = useTranslation();
+  const { enabled, session } = useAuth();
+  const gated = enabled && !session;
   return (
     <View style={styles.panel}>
-      {!!school.description && (
-        <Text style={[styles.body, { color: c.text }]}>{school.description}</Text>
-      )}
+      <Text style={[styles.body, { color: c.text }]}>{schoolSummary(school)}</Text>
 
       <View style={styles.kvGrid}>
         <KV label={t('school.curriculum')} value={school.curriculum} c={c} />
@@ -194,7 +195,11 @@ function Overview({ school, c }: { school: School; c: ThemeColors }) {
         {!!school.founded && (
           <KV label={t('school.founded')} value={String(school.founded)} c={c} />
         )}
-        <KV label={t('school.feeRange')} value={feeValue(school, t)} c={c} />
+        <KV
+          label={t('school.feeRange')}
+          value={gated ? `🔒 ${t('gate.feesLocked')}` : feeValue(school, t)}
+          c={c}
+        />
         {school.enrollment != null && (
           <KV label={t('school.enrollment')} value={String(school.enrollment)} c={c} />
         )}
@@ -299,8 +304,32 @@ function Admissions({ school, c }: { school: School; c: ThemeColors }) {
 
 function Fees({ school, c }: { school: School; c: ThemeColors }) {
   const { t } = useTranslation();
+  const { enabled, session } = useAuth();
+  const router = useRouter();
   const range = feeRangeLabel(school.feeMinAed, school.feeMaxAed);
   const hasAny = school.feeBands.length > 0 || range;
+
+  // Fee details are sign-in gated.
+  if (enabled && !session) {
+    return (
+      <View style={[styles.panel, styles.emptyPanel]}>
+        <View style={[styles.feeLockIcon, { backgroundColor: c.primarySoft }]}>
+          <Ionicons name="lock-closed" size={24} color={c.primary} />
+        </View>
+        <Text style={[styles.noContent, { color: c.text, fontWeight: '700' }]}>
+          {t('gate.feesLocked')}
+        </Text>
+        <Pressable
+          style={[styles.feeLockBtn, { backgroundColor: c.primary }]}
+          onPress={() => router.push('/auth')}
+        >
+          <Text style={{ color: c.textInverse, fontWeight: '800' }}>
+            {t('gate.createAccount')}
+          </Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   if (!hasAny) {
     return (
@@ -573,6 +602,19 @@ const styles = StyleSheet.create({
 
   emptyPanel: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xl },
   noContent: { fontSize: font.body, textAlign: 'center' },
+  feeLockIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  feeLockBtn: {
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    marginTop: spacing.sm,
+  },
 
   reviewCard: {
     borderRadius: radius.md,

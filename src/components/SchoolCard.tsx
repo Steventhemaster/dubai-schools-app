@@ -6,6 +6,8 @@ import { useTranslation } from 'react-i18next';
 import type { School } from '@/lib/types';
 import { font, radius, shadow, spacing, useTheme } from '@/theme';
 import { feeRangeLabel } from '@/lib/format';
+import { schoolSummaryShort } from '@/lib/summary';
+import { useAuth } from '@/lib/auth';
 import { Badge } from './Badge';
 import { useSavedSchools } from './useSavedSchools';
 
@@ -14,6 +16,8 @@ export function SchoolCard({ school }: { school: School }) {
   const { t } = useTranslation();
   const { colors: c } = useTheme();
   const { isSaved, toggle } = useSavedSchools();
+  const { enabled, session } = useAuth();
+  const gated = enabled && !session; // fees hidden until signed in
   const saved = isSaved(school.id);
   const fee = feeRangeLabel(school.feeMinAed, school.feeMaxAed);
 
@@ -70,6 +74,10 @@ export function SchoolCard({ school }: { school: School }) {
         )}
       </View>
 
+      <Text style={[styles.summary, { color: c.textMuted }]} numberOfLines={2}>
+        {schoolSummaryShort(school)}
+      </Text>
+
       <View style={styles.footerRow}>
         <View style={[styles.ratingPill, { backgroundColor: c.surfaceAlt }]}>
           <Ionicons name="star" size={13} color={c.star} />
@@ -80,7 +88,14 @@ export function SchoolCard({ school }: { school: School }) {
             ({school.reviewCount})
           </Text>
         </View>
-        {fee ? (
+        {gated ? (
+          <View style={styles.feeLock}>
+            <Ionicons name="lock-closed" size={12} color={c.textMuted} />
+            <Text style={[styles.feeTba, { color: c.textMuted }]}>
+              {t('gate.feesLocked')}
+            </Text>
+          </View>
+        ) : fee ? (
           <Text style={[styles.fee, { color: c.primary }]}>
             {t('common.aed')} {fee}
           </Text>
@@ -192,6 +207,8 @@ const styles = StyleSheet.create({
   ratingCount: { fontSize: font.tiny },
   fee: { fontSize: font.small, fontWeight: '700' },
   feeTba: { fontSize: font.tiny, fontWeight: '600' },
+  feeLock: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  summary: { fontSize: font.small, lineHeight: 18, marginTop: spacing.sm },
 
   mini: {
     width: 190,

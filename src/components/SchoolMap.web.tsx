@@ -1,15 +1,17 @@
 // Web map (Leaflet + OpenStreetMap, free). Native gets SchoolMap.tsx instead.
 //
-// Leaflet is browser-only and breaks Metro bundling + expo-router's static
-// (server) render if imported at module scope. So we load it from a CDN at
-// runtime, inside an effect — never on the server, never through the bundler.
+// Leaflet (and the markercluster plugin) are browser-only and break Metro
+// bundling + expo-router static render if imported at module scope, so we load
+// them from a CDN at runtime inside an effect — never on the server.
 import React, { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'expo-router';
+import i18n from '@/i18n';
 import type { School } from '@/lib/types';
 import { useTheme } from '@/theme';
 
 const DUBAI: [number, number] = [25.2048, 55.2708];
-const LEAFLET_VERSION = '1.9.4';
+const LV = '1.9.4'; // leaflet
+const MCV = '1.5.3'; // markercluster
 
 function ratingColor(r: School['khdaRating']): string {
   switch (r) {
@@ -22,31 +24,43 @@ function ratingColor(r: School['khdaRating']): string {
   }
 }
 
-/** Inject Leaflet CSS + JS from CDN once; resolve with window.L. */
-function loadLeaflet(): Promise<any> {
-  const w = window as any;
-  if (w.L) return Promise.resolve(w.L);
-  if (!document.getElementById('leaflet-css')) {
-    const link = document.createElement('link');
-    link.id = 'leaflet-css';
-    link.rel = 'stylesheet';
-    link.href = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.css`;
-    document.head.appendChild(link);
-  }
+function addCss(id: string, href: string) {
+  if (document.getElementById(id)) return;
+  const link = document.createElement('link');
+  link.id = id;
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
+
+function addScript(id: string, src: string): Promise<void> {
   return new Promise((resolve, reject) => {
-    const existing = document.getElementById('leaflet-js') as HTMLScriptElement | null;
+    const existing = document.getElementById(id) as HTMLScriptElement | null;
     if (existing) {
-      existing.addEventListener('load', () => resolve(w.L));
+      if ((existing as any)._loaded) resolve();
+      else existing.addEventListener('load', () => resolve());
       return;
     }
     const s = document.createElement('script');
-    s.id = 'leaflet-js';
-    s.src = `https://unpkg.com/leaflet@${LEAFLET_VERSION}/dist/leaflet.js`;
+    s.id = id;
+    s.src = src;
     s.async = true;
-    s.onload = () => resolve(w.L);
-    s.onerror = () => reject(new Error('Failed to load Leaflet'));
+    s.onload = () => { (s as any)._loaded = true; resolve(); };
+    s.onerror = () => reject(new Error('script load failed: ' + src));
     document.head.appendChild(s);
   });
+}
+
+/** Load Leaflet + markercluster from CDN; resolve with window.L. */
+async function loadLeaflet(): Promise<any> {
+  const w = window as any;
+  addCss('leaflet-css', `https://unpkg.com/leaflet@${LV}/dist/leaflet.css`);
+  addCss('mc-css', `https://unpkg.com/leaflet.markercluster@${MCV}/dist/MarkerCluster.css`);
+  addCss('mc-css-def', `https://unpkg.com/leaflet.markercluster@${MCV}/dist/MarkerCluster.Default.css`);
+  if (!w.L) await addScript('leaflet-js', `https://unpkg.com/leaflet@${LV}/dist/leaflet.js`);
+  if (!w.L.markerClusterGroup)
+    await addScript('mc-js', `https://unpkg.com/leaflet.markercluster@${MCV}/dist/leaflet.markercluster.js`);
+  return w.L;
 }
 
 function escapeHtml(s: string): string {
@@ -55,15 +69,20 @@ function escapeHtml(s: string): string {
   );
 }
 
-export function SchoolMap({ schools }: { schools: School[] }) {
+export function SchoolMap({
+  schools,
+  gated = false,
+}: {
+  schools: School[];
+  gated?: boolean;
+}) {
   const router = useRouter();
   const { dark } = useTheme();
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<any>(null);
-  const layerRef = useRef<any>(null);
+  const clusterRef = useRef<any>(null);
   const [error, setError] = useState(false);
 
-  // Init map once Leaflet is loaded.
   useEffect(() => {
     let cancelled = false;
     loadLeaflet()
@@ -76,9 +95,40 @@ export function SchoolMap({ schools }: { schools: School[] }) {
             : 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
           { attribution: '© OpenStreetMap, © CARTO', maxZoom: 19 }
         ).addTo(map);
-        layerRef.current = L.layerGroup().addTo(map);
+
+        // Marker clustering keeps 223 dense pins legible.
+        clusterRef.current = L.markerClusterGroup({
+          chunkedLoading: true,
+          maxClusterRadius: 50,
+          showCoverageOnHover: false,
+        });
+        map.addLayer(clusterRef.current);
         mapRef.current = map;
         setTimeout(() => map.invalidateSize(), 120);
+
+        // "Near me" control.
+        const Locate = L.Control.extend({
+          onAdd() {
+            const b = L.DomUtil.create('button');
+            b.innerHTML = '📍';
+            b.title = i18n.t('home.locateMe');
+            b.style.cssText =
+              'width:36px;height:36px;font-size:18px;line-height:36px;background:#fff;border:none;border-radius:6px;cursor:pointer;box-shadow:0 1px 5px rgba(0,0,0,.3)';
+            L.DomEvent.on(b, 'click', (e: Event) => {
+              L.DomEvent.stop(e);
+              map.locate({ setView: true, maxZoom: 13 });
+            });
+            return b;
+          },
+        });
+        new Locate({ position: 'topright' }).addTo(map);
+        map.on('locationfound', (e: any) => {
+          L.circleMarker(e.latlng, {
+            radius: 8, color: '#fff', weight: 2,
+            fillColor: '#1E90FF', fillOpacity: 0.9,
+          }).addTo(map).bindPopup(i18n.t('home.locateMe')).openPopup();
+        });
+
         map.on('popupopen', (e: any) => {
           const el = e.popup.getElement()?.querySelector('.map-go');
           el?.addEventListener('click', (ev: Event) => {
@@ -87,6 +137,7 @@ export function SchoolMap({ schools }: { schools: School[] }) {
             if (id) router.push(`/school/${id}`);
           }, { once: true });
         });
+
         drawMarkers(L);
       })
       .catch(() => setError(true));
@@ -98,24 +149,23 @@ export function SchoolMap({ schools }: { schools: School[] }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dark]);
 
-  // Redraw markers when the filtered list changes.
   useEffect(() => {
     const L = (window as any).L;
     if (L && mapRef.current) drawMarkers(L);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [schools]);
+  }, [schools, gated]);
 
   function drawMarkers(L: any) {
-    const layer = layerRef.current;
+    const cluster = clusterRef.current;
     const map = mapRef.current;
-    if (!layer || !map) return;
-    layer.clearLayers();
+    if (!cluster || !map) return;
+    cluster.clearLayers();
     const pts: [number, number][] = [];
     for (const s of schools) {
       if (s.lat == null || s.lng == null) continue;
       pts.push([s.lat, s.lng]);
       const fee =
-        s.feeMinAed != null && s.feeMaxAed != null
+        !gated && s.feeMinAed != null && s.feeMaxAed != null
           ? `AED ${s.feeMinAed.toLocaleString()}–${s.feeMaxAed.toLocaleString()}`
           : '';
       L.circleMarker([s.lat, s.lng], {
@@ -133,7 +183,7 @@ export function SchoolMap({ schools }: { schools: School[] }) {
                style="display:inline-block;margin-top:6px;color:#0A3D62;font-weight:700">View school →</a>
            </div>`
         )
-        .addTo(layer);
+        .addTo(cluster);
     }
     if (pts.length) map.fitBounds(L.latLngBounds(pts).pad(0.15), { maxZoom: 14 });
   }

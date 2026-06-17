@@ -19,8 +19,16 @@
     "allSchools": "All schools",
     "viewList": "List",
     "viewMap": "Map",
+    "locateMe": "Near me",
     "mapNativeTitle": "Map view is on the web app",
     "mapNativeBody": "{{count}} schools are mapped on the web version. Native map support is coming soon."
+  },
+  "gate": {
+    "feesLocked": "Sign in to see fees",
+    "unlockTitle": "See all {{total}} schools",
+    "unlockBody": "You're viewing 3 of {{total}}. Sign in — it's free — to unlock every school and full fee details.",
+    "signIn": "Sign in",
+    "createAccount": "Create free account"
   },
   "filter": {
     "curriculum": "Curriculum",

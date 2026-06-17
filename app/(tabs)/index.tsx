@@ -10,9 +10,11 @@ import {
   View,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useAuth } from '@/lib/auth';
 import { SchoolCard, SchoolMiniCard } from '@/components/SchoolCard';
 import { SchoolCardSkeleton } from '@/components/Skeleton';
 import { SchoolMap } from '@/components/SchoolMap';
@@ -20,7 +22,7 @@ import { Chip } from '@/components/FilterChips';
 import { PickerSheet } from '@/components/PickerSheet';
 import { listSchools } from '@/lib/repository';
 import type { School, SchoolFilter } from '@/lib/types';
-import { font, radius, spacing, useTheme, type ThemeColors } from '@/theme';
+import { font, radius, shadow, spacing, useTheme, type ThemeColors } from '@/theme';
 
 type SortKey = 'rating' | 'fees' | null;
 type SheetKey = 'curriculum' | 'area' | null;
@@ -38,6 +40,11 @@ export default function SchoolsScreen() {
   const [sheet, setSheet] = useState<SheetKey>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const { height: winH } = useWindowDimensions();
+  const router = useRouter();
+  const { enabled, session } = useAuth();
+  const gated = enabled && !session; // logged-out: limit list + hide fees
+
+  const FREE_LIMIT = 3;
 
   const load = useCallback(async () => {
     const data = await listSchools();
@@ -104,13 +111,33 @@ export default function SchoolsScreen() {
     !filter.vacancyOnly &&
     topRated.length > 1;
 
+  // Logged-out users see only the first few schools; the rest is teased
+  // behind a sign-in prompt.
+  const listData =
+    loading || viewMode === 'map'
+      ? []
+      : gated
+        ? results.slice(0, FREE_LIMIT)
+        : results;
+  const hiddenCount = gated ? Math.max(0, results.length - FREE_LIMIT) : 0;
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.bg }]} edges={['top']}>
       <FlatList
-        data={loading || viewMode === 'map' ? [] : results}
+        data={listData}
         keyExtractor={(s) => s.id}
         renderItem={({ item }) => <SchoolCard school={item} />}
         contentContainerStyle={styles.listContent}
+        ListFooterComponent={
+          hiddenCount > 0 && viewMode === 'list' ? (
+            <GateCTA
+              total={results.length}
+              teasers={results.slice(FREE_LIMIT, FREE_LIMIT + 2)}
+              onSignIn={() => router.push('/auth')}
+              c={c}
+            />
+          ) : null
+        }
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
@@ -264,7 +291,7 @@ export default function SchoolsScreen() {
                 { height: Math.max(360, winH * 0.62), borderColor: c.border },
               ]}
             >
-              <SchoolMap schools={results} />
+              <SchoolMap schools={results} gated={gated} />
             </View>
           ) : (
             <View style={styles.empty}>
@@ -365,6 +392,58 @@ function SegBtn({
   );
 }
 
+function GateCTA({
+  total,
+  teasers,
+  onSignIn,
+  c,
+}: {
+  total: number;
+  teasers: School[];
+  onSignIn: () => void;
+  c: ThemeColors;
+}) {
+  const { t } = useTranslation();
+  return (
+    <View style={styles.gateWrap}>
+      {/* Blurred-ish teaser: real cards faded out + non-interactive. */}
+      <View pointerEvents="none" style={styles.gateTeasers}>
+        {teasers.map((s) => (
+          <SchoolCard key={`teaser-${s.id}`} school={s} />
+        ))}
+      </View>
+      <View
+        style={[styles.gateFade, { backgroundColor: c.bg }]}
+        pointerEvents="none"
+      />
+      <View style={[styles.gateCard, { backgroundColor: c.surface, borderColor: c.primary }]}>
+        <View style={[styles.gateIcon, { backgroundColor: c.primarySoft }]}>
+          <Ionicons name="lock-closed" size={24} color={c.primary} />
+        </View>
+        <Text style={[styles.gateTitle, { color: c.text }]}>
+          {t('gate.unlockTitle', { total })}
+        </Text>
+        <Text style={[styles.gateBody, { color: c.textMuted }]}>
+          {t('gate.unlockBody', { total })}
+        </Text>
+        <Pressable
+          style={[styles.gatePrimary, { backgroundColor: c.primary }]}
+          onPress={onSignIn}
+        >
+          <Text style={[styles.gatePrimaryText, { color: c.textInverse }]}>
+            {t('gate.createAccount')}
+          </Text>
+        </Pressable>
+        <Pressable onPress={onSignIn} style={styles.gateSecondary}>
+          <Text style={[styles.gateSecondaryText, { color: c.primary }]}>
+            {t('gate.signIn')}
+          </Text>
+        </Pressable>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1 },
   listContent: { padding: spacing.lg, paddingTop: spacing.md },
@@ -420,6 +499,48 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginTop: spacing.sm,
   },
+  gateWrap: { position: 'relative', marginTop: spacing.xs },
+  gateTeasers: { opacity: 0.35 },
+  gateFade: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    height: '60%',
+    opacity: 0.6,
+  },
+  gateCard: {
+    position: 'absolute',
+    left: spacing.md,
+    right: spacing.md,
+    bottom: spacing.lg,
+    alignItems: 'center',
+    gap: spacing.sm,
+    borderWidth: 2,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    ...shadow.card,
+  },
+  gateIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.xs,
+  },
+  gateTitle: { fontSize: font.h3, fontWeight: '800', textAlign: 'center' },
+  gateBody: { fontSize: font.small, textAlign: 'center', lineHeight: 19 },
+  gatePrimary: {
+    alignSelf: 'stretch',
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+    marginTop: spacing.sm,
+  },
+  gatePrimaryText: { fontWeight: '800', fontSize: font.body },
+  gateSecondary: { paddingVertical: spacing.sm },
+  gateSecondaryText: { fontWeight: '700', fontSize: font.small },
   rail: { marginTop: spacing.lg },
   sectionTitle: { fontSize: font.h3, fontWeight: '700', marginBottom: spacing.md },
   count: {

@@ -8,7 +8,12 @@ import { useTranslation } from 'react-i18next';
 import type { School } from '@/lib/types';
 import { font, spacing, useTheme } from '@/theme';
 
-export function SchoolMap({ schools }: { schools: School[] }) {
+export function SchoolMap({
+  schools,
+}: {
+  schools: School[];
+  gated?: boolean;
+}) {
   const { colors: c } = useTheme();
   const { t } = useTranslation();
   const withCoords = schools.filter((s) => s.lat != null && s.lng != null).length;
