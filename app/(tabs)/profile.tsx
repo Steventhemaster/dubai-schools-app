@@ -8,7 +8,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Chip } from '@/components/FilterChips';
 import { setAppLanguage, type AppLanguage } from '@/i18n';
 import { useAuth } from '@/lib/auth';
-import { isSupabaseConfigured, supabase } from '@/lib/supabase';
+import { supabase } from '@/lib/supabase';
 import { font, radius, spacing, useTheme } from '@/theme';
 
 export default function ProfileScreen() {
@@ -91,20 +91,6 @@ export default function ProfileScreen() {
           <Text style={[styles.body, { color: c.textMuted }]}>
             {t('profile.appearanceAuto')}
           </Text>
-        </Section>
-
-        <Section title={t('profile.backendStatus')} icon="server-outline">
-          <View style={styles.statusRow}>
-            <View
-              style={[
-                styles.dot,
-                { backgroundColor: isSupabaseConfigured ? c.success : c.warning },
-              ]}
-            />
-            <Text style={[styles.status, { color: c.text }]}>
-              {isSupabaseConfigured ? t('profile.connected') : t('profile.demoMode')}
-            </Text>
-          </View>
         </Section>
 
         <Section title={t('profile.about')} icon="information-circle-outline">

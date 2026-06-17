@@ -12,6 +12,13 @@ import React, {
 import type { Session } from '@supabase/supabase-js';
 import { isSupabaseConfigured, supabase } from './supabase';
 
+export interface SignUpProfile {
+  firstName: string;
+  lastName: string;
+  gender: 'male' | 'female' | 'undisclosed';
+  phone: string;
+}
+
 interface AuthCtx {
   /** False in offline demo mode — auth UI should be skipped entirely. */
   enabled: boolean;
@@ -21,7 +28,11 @@ interface AuthCtx {
   /** Returns an error message, or null on success. */
   signIn: (email: string, password: string) => Promise<string | null>;
   /** Returns an error message, or null on success (may require email confirm). */
-  signUp: (email: string, password: string) => Promise<string | null>;
+  signUp: (
+    email: string,
+    password: string,
+    profile: SignUpProfile
+  ) => Promise<string | null>;
   signOut: () => Promise<void>;
 }
 
@@ -45,9 +56,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return error ? error.message : null;
   };
 
-  const signUp = async (email: string, password: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    profile: SignUpProfile
+  ) => {
     if (!supabase) return 'Demo mode — Supabase not configured';
-    const { error } = await supabase.auth.signUp({ email, password });
+    // Profile fields ride along as user metadata; a DB trigger writes them
+    // into public.profiles. Passwords never touch our tables.
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: {
+          first_name: profile.firstName,
+          last_name: profile.lastName,
+          gender: profile.gender,
+          phone: profile.phone,
+        },
+      },
+    });
     return error ? error.message : null;
   };
 

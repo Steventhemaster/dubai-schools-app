@@ -27,6 +27,10 @@ export default function AuthScreen() {
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [gender, setGender] = useState<'male' | 'female' | 'undisclosed' | ''>('');
+  const [phone, setPhone] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -36,6 +40,13 @@ export default function AuthScreen() {
       setError(t('auth.errorInvalid'));
       return;
     }
+    if (
+      mode === 'signup' &&
+      (!firstName.trim() || !lastName.trim() || !gender || !phone.trim())
+    ) {
+      setError(t('auth.errorProfile'));
+      return;
+    }
     setError(null);
     setInfo(null);
     setBusy(true);
@@ -43,7 +54,12 @@ export default function AuthScreen() {
       const err =
         mode === 'signin'
           ? await signIn(email.trim(), password)
-          : await signUp(email.trim(), password);
+          : await signUp(email.trim(), password, {
+              firstName: firstName.trim(),
+              lastName: lastName.trim(),
+              gender: gender as 'male' | 'female' | 'undisclosed',
+              phone: phone.trim(),
+            });
       if (err) {
         setError(err);
       } else if (mode === 'signup') {
@@ -81,6 +97,72 @@ export default function AuthScreen() {
               {t('auth.demoNotice')}
             </Text>
           </View>
+        )}
+
+        {mode === 'signup' && (
+          <>
+            <View style={styles.nameRow}>
+              <View style={styles.nameCol}>
+                <Text style={[styles.label, { color: c.text }]}>{t('auth.firstName')}</Text>
+                <TextInput
+                  style={inputStyle}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  autoComplete="name-given"
+                  placeholder={t('auth.firstName')}
+                  placeholderTextColor={c.textMuted}
+                />
+              </View>
+              <View style={styles.nameCol}>
+                <Text style={[styles.label, { color: c.text }]}>{t('auth.lastName')}</Text>
+                <TextInput
+                  style={inputStyle}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  autoComplete="name-family"
+                  placeholder={t('auth.lastName')}
+                  placeholderTextColor={c.textMuted}
+                />
+              </View>
+            </View>
+
+            <Text style={[styles.label, { color: c.text }]}>{t('auth.gender')}</Text>
+            <View style={styles.genderRow}>
+              {(['male', 'female', 'undisclosed'] as const).map((g) => (
+                <Pressable
+                  key={g}
+                  onPress={() => setGender(g)}
+                  style={[
+                    styles.genderChip,
+                    {
+                      borderColor: gender === g ? c.primary : c.border,
+                      backgroundColor: gender === g ? c.primarySoft : c.surface,
+                    },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.genderText,
+                      { color: gender === g ? c.primary : c.text },
+                    ]}
+                  >
+                    {t(`auth.gender_${g}`)}
+                  </Text>
+                </Pressable>
+              ))}
+            </View>
+
+            <Text style={[styles.label, { color: c.text }]}>{t('auth.phone')}</Text>
+            <TextInput
+              style={inputStyle}
+              value={phone}
+              onChangeText={setPhone}
+              keyboardType="phone-pad"
+              autoComplete="tel"
+              placeholder="+971 50 000 0000"
+              placeholderTextColor={c.textMuted}
+            />
+          </>
         )}
 
         <Text style={[styles.label, { color: c.text }]}>{t('auth.email')}</Text>
@@ -143,6 +225,17 @@ export default function AuthScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   content: { padding: spacing.xl },
+  nameRow: { flexDirection: 'row', gap: spacing.md },
+  nameCol: { flex: 1 },
+  genderRow: { flexDirection: 'row', gap: spacing.sm },
+  genderChip: {
+    flex: 1,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    alignItems: 'center',
+  },
+  genderText: { fontSize: font.small, fontWeight: '600' },
   iconWrap: {
     width: 72,
     height: 72,
