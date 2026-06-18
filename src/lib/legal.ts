@@ -56,43 +56,57 @@ export const PRIVACY_POLICY: LegalSection[] = [
     heading: '5. Sharing and processors',
     body: [
       'We use Supabase as our database, authentication, and hosting processor. Your data is stored on their infrastructure under their security controls.',
-      'We do not sell your personal data.',
+      'We do not sell your personal data and we do not use it for third-party advertising.',
       'School facts (names, areas, curriculum, ratings, fees) are sourced from KHDA open data and other public sources and are not personal data about you.',
-      'We may disclose data where required by law or competent UAE authorities.',
+      'We may disclose data where required by law or by competent UAE authorities.',
     ],
   },
   {
-    heading: '6. Storage, location and retention',
+    heading: '6. International transfer',
     body: [
-      'Data is stored with our processor and may be hosted outside the UAE; we take steps so that any international transfer has appropriate safeguards as required by UAE law.',
-      'We keep your account data while your account is active. When you delete your account, your account data is removed and your reviews are disassociated from your identity.',
+      'Our processor (Supabase) may host data on servers located outside the UAE. Where personal data is transferred abroad, we rely on the safeguards permitted under the UAE Personal Data Protection Law and our processor’s contractual and security commitments.',
+      'By using the App and providing your data, you are informed of this cross-border processing.',
     ],
   },
   {
-    heading: '7. Your rights',
+    heading: '7. Retention',
+    body: [
+      'We keep your account data (name, gender, phone, email) while your account is active.',
+      'When you delete your account, your account record is deleted and your reviews are disassociated from your identity (kept only as anonymous content). Residual copies in encrypted backups are purged on our processor’s rolling backup cycle.',
+    ],
+  },
+  {
+    heading: '8. Cookies & local storage',
+    body: [
+      'On the web app we use browser local storage (not advertising cookies) to keep you signed in and to remember preferences such as language and saved schools. On mobile we use the device’s secure local storage for the same purposes.',
+    ],
+  },
+  {
+    heading: '9. Your rights',
     body: [
       'You may access, correct, or delete your personal data. Account deletion is available in the app (Profile → Delete account) and removes your account data.',
-      'You may withdraw consent, object to certain processing, or request a copy of your data by contacting us.',
+      'You may withdraw consent, object to certain processing, restrict processing, or request a copy of your data by contacting us.',
+      'You have the right to lodge a complaint with the UAE Data Office if you believe your data has been mishandled.',
       `To exercise any right, contact ${LEGAL_META.contactEmail}.`,
     ],
   },
   {
-    heading: '8. Children',
+    heading: '10. Children',
     body: [
-      'The App is intended for adults (18+), typically parents and guardians. It is not directed at children, and we do not knowingly collect data from anyone under 18.',
+      'The App is intended for adults (18+), typically parents and guardians. It is not directed at children, and we do not knowingly collect data from anyone under 18. If you believe a minor has provided data, contact us and we will delete it.',
     ],
   },
   {
-    heading: '9. Security',
+    heading: '11. Security',
     body: [
-      'We apply administrative and technical safeguards (including row-level security and encrypted credentials). No system is perfectly secure, but we work to protect your data.',
+      'We apply administrative and technical safeguards (including database row-level security and encrypted credentials). No system is perfectly secure, but we work to protect your data and will notify affected users and authorities of a qualifying breach as required by law.',
     ],
   },
   {
-    heading: '10. Changes & contact',
+    heading: '12. Changes & contact',
     body: [
       'We may update this policy; material changes will be notified in-app. Continued use after changes means you accept the updated policy.',
-      `Questions or requests: ${LEGAL_META.contactEmail}.`,
+      `Controller / contact: ${LEGAL_META.operator}, ${LEGAL_META.contactEmail}.`,
     ],
   },
 ];
@@ -144,32 +158,51 @@ export const TERMS_OF_SERVICE: LegalSection[] = [
     ],
   },
   {
-    heading: '8. Intellectual property',
+    heading: '8. Your indemnity',
+    body: [
+      'You agree to indemnify and hold us harmless from claims, damages, and costs (including reasonable legal fees) arising from content you submit or from your breach of these Terms or of any law — including claims of defamation or infringement relating to your reviews.',
+    ],
+  },
+  {
+    heading: '9. Intellectual property',
     body: [
       'The App, its design and software are owned by us or our licensors. Public school data remains attributable to its sources (e.g., KHDA).',
     ],
   },
   {
-    heading: '9. Disclaimers & liability',
+    heading: '10. Disclaimers & liability',
     body: [
-      'The App is provided "as is" without warranties of any kind. We do not warrant the accuracy or completeness of school information.',
-      'To the maximum extent permitted by law, we are not liable for indirect or consequential losses, or for decisions made in reliance on information in the App.',
+      'The App is provided "as is" and "as available" without warranties of any kind. We do not warrant the accuracy, completeness, or timeliness of school information (including fees, ratings, and vacancy).',
+      'To the maximum extent permitted by law, we are not liable for indirect, incidental, or consequential losses, or for decisions made in reliance on information in the App.',
     ],
   },
   {
-    heading: '10. Termination',
+    heading: '11. Termination',
     body: [
       'You may delete your account at any time. We may suspend or terminate access for breach of these Terms.',
     ],
   },
   {
-    heading: '11. Governing law',
+    heading: '12. Changes to these Terms',
+    body: [
+      'We may update these Terms; material changes will be notified in-app. Continued use after changes means you accept the updated Terms.',
+    ],
+  },
+  {
+    heading: '13. General',
+    body: [
+      'If any provision is held unenforceable, the rest remain in effect (severability). We may assign these Terms in connection with a merger or transfer of the App; you may not assign yours without our consent.',
+      'We are not liable for failures caused by events beyond our reasonable control (force majeure). Our failure to enforce a provision is not a waiver. These Terms and the Privacy Policy are the entire agreement between you and us regarding the App.',
+    ],
+  },
+  {
+    heading: '14. Governing law',
     body: [
       `These Terms are governed by the laws of ${LEGAL_META.jurisdiction}, and disputes are subject to the competent courts of Dubai.`,
     ],
   },
   {
-    heading: '12. Contact',
-    body: [`Questions about these Terms: ${LEGAL_META.contactEmail}.`],
+    heading: '15. Contact',
+    body: [`Questions about these Terms: ${LEGAL_META.operator}, ${LEGAL_META.contactEmail}.`],
   },
 ];
