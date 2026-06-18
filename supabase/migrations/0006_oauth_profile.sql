@@ -13,7 +13,7 @@ language plpgsql security definer set search_path = public
 as $$
 declare
   m    jsonb := new.raw_user_meta_data;
-  full text;
+  fullname text;
   fn   text;
   ln   text;
   dn   text;
@@ -29,11 +29,11 @@ begin
   );
 
   if fn is null then
-    full := coalesce(nullif(trim(m->>'full_name'), ''), nullif(trim(m->>'name'), ''));
-    if full is not null then
-      fn := split_part(full, ' ', 1);
-      if position(' ' in full) > 0 then
-        ln := substr(full, position(' ' in full) + 1);
+    fullname := coalesce(nullif(trim(m->>'full_name'), ''), nullif(trim(m->>'name'), ''));
+    if fullname is not null then
+      fn := split_part(fullname, ' ', 1);
+      if position(' ' in fullname) > 0 then
+        ln := substr(fullname, position(' ' in fullname) + 1);
       end if;
     end if;
   end if;
