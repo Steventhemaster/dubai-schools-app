@@ -1,5 +1,6 @@
 // ── Supabase client (Backend Architect role) ──────────────────────────────
 import 'react-native-url-polyfill/auto';
+import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import Constants from 'expo-constants';
@@ -39,7 +40,10 @@ export const supabase: SupabaseClient | null = isSupabaseConfigured
         storage: isServer ? noopStorage : AsyncStorage,
         autoRefreshToken: !isServer,
         persistSession: !isServer,
-        detectSessionInUrl: false,
+        // On web we must parse the token from the email-confirmation / OAuth
+        // redirect URL to complete sign-in. Off on native (no URL bar) and on
+        // the SSR server (no window).
+        detectSessionInUrl: Platform.OS === 'web' && !isServer,
       },
     })
   : null;
