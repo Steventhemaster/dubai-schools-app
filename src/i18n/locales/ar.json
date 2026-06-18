@@ -110,6 +110,7 @@
     "firstName": "الاسم الأول",
     "lastName": "اسم العائلة",
     "gender": "الجنس",
+    "optional": "(اختياري)",
     "gender_male": "ذكر",
     "gender_female": "أنثى",
     "gender_undisclosed": "أفضّل عدم الإفصاح",

@@ -110,6 +110,7 @@
     "firstName": "First name",
     "lastName": "Last name",
     "gender": "Gender",
+    "optional": "(optional)",
     "gender_male": "Male",
     "gender_female": "Female",
     "gender_undisclosed": "Prefer not to say",

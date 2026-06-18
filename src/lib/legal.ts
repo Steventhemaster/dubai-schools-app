@@ -32,7 +32,7 @@ export const PRIVACY_POLICY: LegalSection[] = [
   {
     heading: '2. Data we collect',
     body: [
-      'Account data you provide at sign-up: first name, last name, gender, phone number, and email address.',
+      'Account data you provide at sign-up — required: first name, last name, and email address; optional: gender and phone number (you can leave these blank).',
       'Content you create: school reviews, ratings, and saved/bookmarked schools.',
       'Technical data: app/device information and basic usage needed to operate and secure the service.',
       'We do NOT store your password — authentication is handled by our processor (Supabase) and passwords are stored only as a secure cryptographic hash.',

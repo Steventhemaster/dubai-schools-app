@@ -15,7 +15,9 @@ import { isSupabaseConfigured, supabase } from './supabase';
 export interface SignUpProfile {
   firstName: string;
   lastName: string;
-  gender: 'male' | 'female' | 'undisclosed';
+  /** Optional — empty string when not provided. */
+  gender: 'male' | 'female' | 'undisclosed' | '';
+  /** Optional — empty string when not provided. */
   phone: string;
 }
 

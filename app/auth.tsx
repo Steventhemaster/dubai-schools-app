@@ -41,10 +41,8 @@ export default function AuthScreen() {
       setError(t('auth.errorInvalid'));
       return;
     }
-    if (
-      mode === 'signup' &&
-      (!firstName.trim() || !lastName.trim() || !gender || !phone.trim())
-    ) {
+    // Only name is required; gender and phone are optional (data minimisation).
+    if (mode === 'signup' && (!firstName.trim() || !lastName.trim())) {
       setError(t('auth.errorProfile'));
       return;
     }
@@ -62,7 +60,7 @@ export default function AuthScreen() {
           : await signUp(email.trim(), password, {
               firstName: firstName.trim(),
               lastName: lastName.trim(),
-              gender: gender as 'male' | 'female' | 'undisclosed',
+              gender,
               phone: phone.trim(),
             });
       if (err) {
@@ -131,7 +129,9 @@ export default function AuthScreen() {
               </View>
             </View>
 
-            <Text style={[styles.label, { color: c.text }]}>{t('auth.gender')}</Text>
+            <Text style={[styles.label, { color: c.text }]}>
+              {t('auth.gender')} <Text style={{ color: c.textMuted }}>{t('auth.optional')}</Text>
+            </Text>
             <View style={styles.genderRow}>
               {(['male', 'female', 'undisclosed'] as const).map((g) => (
                 <Pressable
@@ -157,7 +157,9 @@ export default function AuthScreen() {
               ))}
             </View>
 
-            <Text style={[styles.label, { color: c.text }]}>{t('auth.phone')}</Text>
+            <Text style={[styles.label, { color: c.text }]}>
+              {t('auth.phone')} <Text style={{ color: c.textMuted }}>{t('auth.optional')}</Text>
+            </Text>
             <TextInput
               style={inputStyle}
               value={phone}
