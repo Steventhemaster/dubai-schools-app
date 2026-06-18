@@ -11,6 +11,7 @@ export const LEGAL_META = {
   effectiveDate: '2026-06-17',
   appName: 'Dubai Schools',
   operator: '[Operator legal name]',
+  operatorAddress: '[Operator registered address, Dubai, UAE]',
   contactEmail: '[support@your-domain.com]',
   jurisdiction: 'the Emirate of Dubai and the applicable federal laws of the United Arab Emirates',
 };
@@ -42,7 +43,8 @@ export const PRIVACY_POLICY: LegalSection[] = [
     body: [
       'To create and manage your account and authenticate you.',
       'To publish reviews you submit under your display name (first name + last name).',
-      'To operate, secure, moderate, and improve the service (including preventing spam and abuse).',
+      'To operate, secure, and improve the service (including preventing spam and abuse).',
+      'To review, moderate, and filter user content — reviews may be checked or filtered before and/or after they appear (pre- and post-moderation) for community safety and legal compliance.',
       'To contact you about your account or important service changes.',
     ],
   },
@@ -64,8 +66,8 @@ export const PRIVACY_POLICY: LegalSection[] = [
   {
     heading: '6. International transfer',
     body: [
-      'Our processor (Supabase) may host data on servers located outside the UAE. Where personal data is transferred abroad, we rely on the safeguards permitted under the UAE Personal Data Protection Law and our processor’s contractual and security commitments.',
-      'By using the App and providing your data, you are informed of this cross-border processing.',
+      'Our processor (Supabase) may host data on servers located outside the UAE (see the processor’s current region). Where personal data is transferred abroad, we rely on the safeguards permitted under the UAE Personal Data Protection Law — including a data processing agreement with standard contractual protections — together with your consent given at sign-up.',
+      'By creating an account and consenting at sign-up, you agree to this cross-border processing.',
     ],
   },
   {
@@ -105,8 +107,8 @@ export const PRIVACY_POLICY: LegalSection[] = [
   {
     heading: '12. Changes & contact',
     body: [
-      'We may update this policy; material changes will be notified in-app. Continued use after changes means you accept the updated policy.',
-      `Controller / contact: ${LEGAL_META.operator}, ${LEGAL_META.contactEmail}.`,
+      'We may update this policy; material changes will be notified in-app. For changes that materially affect how we process your personal data, we will seek your renewed consent where required by law.',
+      `Controller / contact: ${LEGAL_META.operator}, ${LEGAL_META.operatorAddress}, ${LEGAL_META.contactEmail}.`,
     ],
   },
 ];
@@ -141,14 +143,16 @@ export const TERMS_OF_SERVICE: LegalSection[] = [
     body: [
       'You are solely responsible for reviews and other content you submit. Content must be your genuine, honest opinion or accurate information.',
       'You must NOT post content that is false, defamatory, abusive, hateful, harassing, obscene, unlawful, or that infringes others’ rights. Under UAE law, online defamation and false information are serious offences.',
-      'You grant us a non-exclusive, royalty-free licence to host, display, and distribute your content within the App.',
-      'Reviews are tied to your account to keep the community accountable.',
+      'You grant us a non-exclusive, royalty-free licence to host, display, and distribute your content within and for the operation and promotion of the App. This licence continues for content that remains (in anonymised form) after you delete your account or a review.',
+      'Reviews are tied to your account to keep the community accountable, and are published under your display name.',
     ],
   },
   {
-    heading: '6. Moderation & reporting',
+    heading: '6. Moderation, reporting & takedown',
     body: [
-      'You can report objectionable content in the App. We may remove content and suspend or ban accounts that violate these Terms, at our discretion, and we may pre-moderate content before it appears.',
+      'You can report objectionable content in the App. We may remove content and suspend or ban accounts that violate these Terms, at our discretion.',
+      `If you believe content infringes your rights or is defamatory, notify us at ${LEGAL_META.contactEmail} with the content location and the basis of your complaint. We will review and may remove it.`,
+      'We may, but are not obliged to, monitor or pre-moderate content. Moderation does not guarantee that all objectionable content is removed, and acting on (or declining) a report does not make us liable for user content.',
     ],
   },
   {
@@ -174,6 +178,7 @@ export const TERMS_OF_SERVICE: LegalSection[] = [
     body: [
       'The App is provided "as is" and "as available" without warranties of any kind. We do not warrant the accuracy, completeness, or timeliness of school information (including fees, ratings, and vacancy).',
       'To the maximum extent permitted by law, we are not liable for indirect, incidental, or consequential losses, or for decisions made in reliance on information in the App.',
+      'Our total aggregate liability for any claim relating to the App shall not exceed AED 500. Nothing in these Terms excludes liability that cannot be excluded under UAE law (for example, for death or personal injury caused by negligence, fraud, or wilful misconduct).',
     ],
   },
   {
