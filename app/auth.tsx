@@ -22,7 +22,7 @@ export default function AuthScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { colors: c } = useTheme();
-  const { enabled, signIn, signUp } = useAuth();
+  const { enabled, signIn, signInWithGoogle, signUp } = useAuth();
 
   const [mode, setMode] = useState<Mode>('signin');
   const [email, setEmail] = useState('');
@@ -103,6 +103,30 @@ export default function AuthScreen() {
               {t('auth.demoNotice')}
             </Text>
           </View>
+        )}
+
+        {enabled && Platform.OS === 'web' && (
+          <>
+            <Pressable
+              style={[styles.googleBtn, { borderColor: c.border, backgroundColor: c.surface }]}
+              onPress={async () => {
+                const err = await signInWithGoogle();
+                if (err) setError(err);
+              }}
+            >
+              <Ionicons name="logo-google" size={18} color="#EA4335" />
+              <Text style={[styles.googleText, { color: c.text }]}>
+                {t('auth.continueGoogle')}
+              </Text>
+            </Pressable>
+            <View style={styles.divider}>
+              <View style={[styles.dividerLine, { backgroundColor: c.border }]} />
+              <Text style={[styles.dividerText, { color: c.textMuted }]}>
+                {t('auth.or')}
+              </Text>
+              <View style={[styles.dividerLine, { backgroundColor: c.border }]} />
+            </View>
+          </>
         )}
 
         {mode === 'signup' && (
@@ -279,6 +303,20 @@ const styles = StyleSheet.create({
     marginTop: spacing.lg,
   },
   consentText: { flex: 1, fontSize: font.small, lineHeight: 19 },
+  googleBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    paddingVertical: spacing.md,
+    marginBottom: spacing.md,
+  },
+  googleText: { fontSize: font.body, fontWeight: '700' },
+  divider: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, marginBottom: spacing.sm },
+  dividerLine: { flex: 1, height: 1 },
+  dividerText: { fontSize: font.small },
   iconWrap: {
     width: 72,
     height: 72,

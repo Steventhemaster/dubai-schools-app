@@ -9,6 +9,7 @@ import React, {
   useEffect,
   useState,
 } from 'react';
+import { Platform } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
 import { isSupabaseConfigured, supabase } from './supabase';
 
@@ -29,6 +30,8 @@ interface AuthCtx {
   email: string | null;
   /** Returns an error message, or null on success. */
   signIn: (email: string, password: string) => Promise<string | null>;
+  /** Google OAuth (web). Redirects the page; returns an error message on failure. */
+  signInWithGoogle: () => Promise<string | null>;
   /**
    * Creates an account. `needsConfirmation` is true when email confirmation is
    * required (no session yet); false means the user is signed in immediately
@@ -59,6 +62,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async (email: string, password: string) => {
     if (!supabase) return 'Demo mode — Supabase not configured';
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    return error ? error.message : null;
+  };
+
+  const signInWithGoogle = async () => {
+    if (!supabase) return 'Demo mode — Supabase not configured';
+    // Web: full-page redirect to Google, then back to our origin where
+    // detectSessionInUrl completes sign-in. Native needs a deep link (later).
+    const redirectTo =
+      Platform.OS === 'web' && typeof window !== 'undefined'
+        ? window.location.origin
+        : undefined;
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo },
+    });
     return error ? error.message : null;
   };
 
@@ -100,6 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         session,
         email: session?.user?.email ?? null,
         signIn,
+        signInWithGoogle,
         signUp,
         signOut,
       }}

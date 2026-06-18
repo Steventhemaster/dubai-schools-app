@@ -105,6 +105,8 @@
     "title": "Account",
     "signIn": "Sign in",
     "signUp": "Create account",
+    "continueGoogle": "Continue with Google",
+    "or": "or",
     "email": "Email",
     "password": "Password",
     "firstName": "First name",
