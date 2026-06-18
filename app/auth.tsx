@@ -54,21 +54,24 @@ export default function AuthScreen() {
     setInfo(null);
     setBusy(true);
     try {
-      const err =
-        mode === 'signin'
-          ? await signIn(email.trim(), password)
-          : await signUp(email.trim(), password, {
-              firstName: firstName.trim(),
-              lastName: lastName.trim(),
-              gender,
-              phone: phone.trim(),
-            });
-      if (err) {
-        setError(err);
-      } else if (mode === 'signup') {
-        setInfo(t('auth.checkEmail'));
+      if (mode === 'signin') {
+        const err = await signIn(email.trim(), password);
+        if (err) setError(err);
+        else router.back();
       } else {
-        router.back();
+        const { error: err, needsConfirmation } = await signUp(
+          email.trim(),
+          password,
+          {
+            firstName: firstName.trim(),
+            lastName: lastName.trim(),
+            gender,
+            phone: phone.trim(),
+          }
+        );
+        if (err) setError(err);
+        else if (needsConfirmation) setInfo(t('auth.checkEmail'));
+        else router.back(); // signed in immediately (confirm email off)
       }
     } finally {
       setBusy(false);

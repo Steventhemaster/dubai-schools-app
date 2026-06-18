@@ -29,12 +29,16 @@ interface AuthCtx {
   email: string | null;
   /** Returns an error message, or null on success. */
   signIn: (email: string, password: string) => Promise<string | null>;
-  /** Returns an error message, or null on success (may require email confirm). */
+  /**
+   * Creates an account. `needsConfirmation` is true when email confirmation is
+   * required (no session yet); false means the user is signed in immediately
+   * (e.g. when "Confirm email" is disabled).
+   */
   signUp: (
     email: string,
     password: string,
     profile: SignUpProfile
-  ) => Promise<string | null>;
+  ) => Promise<{ error: string | null; needsConfirmation: boolean }>;
   signOut: () => Promise<void>;
 }
 
@@ -63,10 +67,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string,
     profile: SignUpProfile
   ) => {
-    if (!supabase) return 'Demo mode — Supabase not configured';
+    if (!supabase) {
+      return { error: 'Demo mode — Supabase not configured', needsConfirmation: false };
+    }
     // Profile fields ride along as user metadata; a DB trigger writes them
     // into public.profiles. Passwords never touch our tables.
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -78,7 +84,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         },
       },
     });
-    return error ? error.message : null;
+    if (error) return { error: error.message, needsConfirmation: false };
+    // No session => email confirmation required; session => signed in now.
+    return { error: null, needsConfirmation: !data.session };
   };
 
   const signOut = async () => {
