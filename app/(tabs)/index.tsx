@@ -1,555 +1,157 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  FlatList,
-  Pressable,
-  RefreshControl,
-  StyleSheet,
-  Text,
-  TextInput,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import React from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useTranslation } from 'react-i18next';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useAuth } from '@/lib/auth';
-import { SchoolCard, SchoolMiniCard } from '@/components/SchoolCard';
-import { SchoolCardSkeleton } from '@/components/Skeleton';
-import { SchoolMap } from '@/components/SchoolMap';
-import { Chip } from '@/components/FilterChips';
-import { PickerSheet } from '@/components/PickerSheet';
-import { listSchools } from '@/lib/repository';
-import type { School, SchoolFilter } from '@/lib/types';
+import { usePlan } from '@/lib/usePlan';
+import { OFFICES, BUDGET_BANDS } from '@/lib/planner';
 import { font, radius, shadow, spacing, useTheme, type ThemeColors } from '@/theme';
 
-type SortKey = 'rating' | 'fees' | null;
-type SheetKey = 'curriculum' | 'area' | null;
-type ViewMode = 'list' | 'map';
-
-export default function SchoolsScreen() {
-  const { t } = useTranslation();
-  const { colors: c } = useTheme();
-  const [all, setAll] = useState<School[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState<SchoolFilter>({});
-  const [sort, setSort] = useState<SortKey>(null);
-  const [sheet, setSheet] = useState<SheetKey>(null);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const { height: winH } = useWindowDimensions();
+export default function PlanHomeScreen() {
   const router = useRouter();
-  const { enabled, session } = useAuth();
-  const gated = enabled && !session; // logged-out: limit list + hide fees
-
-  const FREE_LIMIT = 3;
-
-  const load = useCallback(async () => {
-    const data = await listSchools();
-    setAll(data);
-  }, []);
-
-  useEffect(() => {
-    load().finally(() => setLoading(false));
-  }, [load]);
-
-  const onRefresh = useCallback(async () => {
-    setRefreshing(true);
-    await load();
-    setRefreshing(false);
-  }, [load]);
-
-  // Filter options come from the loaded data so they reflect what's actually
-  // present (78 Dubai areas → a searchable picker, not a chip row).
-  const areas = useMemo(
-    () => Array.from(new Set(all.map((s) => s.area))).sort(),
-    [all]
-  );
-  const curricula = useMemo(
-    () => Array.from(new Set(all.map((s) => s.curriculum))).sort(),
-    [all]
-  );
-
-  const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = all.filter((s) => {
-      if (q && !s.name.toLowerCase().includes(q) && !s.area.toLowerCase().includes(q))
-        return false;
-      if (filter.curriculum && s.curriculum !== filter.curriculum) return false;
-      if (filter.area && s.area !== filter.area) return false;
-      // Unknown vacancy (null) is excluded from "has vacancy" results.
-      if (filter.vacancyOnly && s.hasVacancy !== true) return false;
-      return true;
-    });
-    if (sort === 'rating') {
-      return [...filtered].sort((a, b) => b.avgRating - a.avgRating);
-    }
-    if (sort === 'fees') {
-      return [...filtered].sort(
-        (a, b) => (a.feeMinAed ?? Infinity) - (b.feeMinAed ?? Infinity)
-      );
-    }
-    return filtered;
-  }, [all, query, filter, sort]);
-
-  // Horizontal rail: best-reviewed schools; before reviews exist (cold
-  // start) fall back to official KHDA "Outstanding" schools so the rail is
-  // never empty on a fresh launch.
-  const topRated = useMemo(() => {
-    const reviewed = all
-      .filter((s) => s.reviewCount > 0)
-      .sort((a, b) => b.avgRating - a.avgRating);
-    if (reviewed.length > 1) return reviewed.slice(0, 6);
-    return all.filter((s) => s.khdaRating === 'Outstanding').slice(0, 6);
-  }, [all]);
-  const showRail =
-    !query &&
-    !filter.curriculum &&
-    !filter.area &&
-    !filter.vacancyOnly &&
-    topRated.length > 1;
-
-  // Logged-out users see only the first few schools; the rest is teased
-  // behind a sign-in prompt.
-  const listData =
-    loading || viewMode === 'map'
-      ? []
-      : gated
-        ? results.slice(0, FREE_LIMIT)
-        : results;
-  const hiddenCount = gated ? Math.max(0, results.length - FREE_LIMIT) : 0;
+  const { colors: c } = useTheme();
+  const { plan } = usePlan();
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: c.bg }]} edges={['top']}>
-      <FlatList
-        data={listData}
-        keyExtractor={(s) => s.id}
-        renderItem={({ item }) => <SchoolCard school={item} />}
-        contentContainerStyle={styles.listContent}
-        ListFooterComponent={
-          hiddenCount > 0 && viewMode === 'list' ? (
-            <GateCTA
-              total={results.length}
-              teasers={results.slice(FREE_LIMIT, FREE_LIMIT + 2)}
-              onSignIn={() => router.push('/auth')}
-              c={c}
-            />
-          ) : null
-        }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-            tintColor={c.primary}
-          />
-        }
-        ListHeaderComponent={
-          <View style={styles.header}>
-            <Text style={[styles.appName, { color: c.accentText }]}>
-              {t('app.name').toUpperCase()}
+      <ScrollView contentContainerStyle={styles.body}>
+        <Text style={[styles.eyebrow, { color: c.primary }]}>DUBAI FAMILY PLANNER</Text>
+        <Text style={[styles.hero, { color: c.text }]}>
+          Find the best school & community for your family
+        </Text>
+        <Text style={[styles.heroSub, { color: c.textMuted }]}>
+          Answer a few questions and get matched on tuition, commute, KHDA rating, and
+          family-friendly areas across Dubai — no endless browsing.
+        </Text>
+
+        {plan ? (
+          <View style={[styles.planCard, { backgroundColor: c.primarySoft, borderColor: c.primary }]}>
+            <Text style={[styles.planCardLabel, { color: c.primaryText }]}>YOUR PLAN</Text>
+            <Text style={[styles.planCardSummary, { color: c.text }]}>
+              {plan.children.length} {plan.children.length > 1 ? 'children' : 'child'} ·{' '}
+              {plan.curriculum} ·{' '}
+              {BUDGET_BANDS.find((b) => b.id === plan.budget)?.label ?? ''}
             </Text>
-            <Text style={[styles.title, { color: c.text }]}>{t('home.title')}</Text>
-            <Text style={[styles.subtitle, { color: c.textMuted }]}>
-              {t('home.subtitle')}
+            <Text style={[styles.planCardSub, { color: c.textMuted }]}>
+              Work near {OFFICES.find((o) => o.id === plan.officeId)?.label ?? 'Dubai'}
             </Text>
-
-            <View
-              style={[
-                styles.search,
-                { backgroundColor: c.surface, borderColor: c.border },
-              ]}
-            >
-              <Ionicons name="search" size={18} color={c.textMuted} />
-              <TextInput
-                style={[styles.searchInput, { color: c.text }]}
-                placeholder={t('home.searchPlaceholder')}
-                placeholderTextColor={c.textMuted}
-                value={query}
-                onChangeText={setQuery}
-                returnKeyType="search"
-              />
-              {query.length > 0 && (
-                <Ionicons
-                  name="close-circle"
-                  size={18}
-                  color={c.textMuted}
-                  onPress={() => setQuery('')}
-                />
-              )}
+            <View style={styles.planCardActions}>
+              <Pressable
+                style={[styles.primaryBtn, { backgroundColor: c.primary, flex: 1 }]}
+                onPress={() => router.push('/plan/results')}
+              >
+                <Text style={[styles.primaryText, { color: c.textInverse }]}>View my matches</Text>
+              </Pressable>
+              <Pressable
+                style={[styles.ghostBtn, { borderColor: c.primary }]}
+                onPress={() => router.push('/plan/wizard')}
+              >
+                <Ionicons name="options-outline" size={18} color={c.primary} />
+              </Pressable>
             </View>
-
-            <View style={styles.filterRow}>
-              <FilterButton
-                icon="book-outline"
-                label={t('filter.curriculum')}
-                value={filter.curriculum}
-                onPress={() => setSheet('curriculum')}
-                c={c}
-              />
-              <FilterButton
-                icon="location-outline"
-                label={t('filter.area')}
-                value={filter.area}
-                onPress={() => setSheet('area')}
-                c={c}
-              />
-            </View>
-
-            <View style={styles.sortRow}>
-              <Chip
-                label={t('filter.vacancyOnly')}
-                active={!!filter.vacancyOnly}
-                onPress={() =>
-                  setFilter((f) => ({ ...f, vacancyOnly: f.vacancyOnly ? undefined : true }))
-                }
-                icon={
-                  <Ionicons
-                    name="checkmark-circle-outline"
-                    size={14}
-                    color={filter.vacancyOnly ? c.textInverse : c.success}
-                  />
-                }
-              />
-              <Chip
-                label={t('home.sortRating')}
-                active={sort === 'rating'}
-                onPress={() => setSort(sort === 'rating' ? null : 'rating')}
-                icon={
-                  <Ionicons
-                    name="star-outline"
-                    size={14}
-                    color={sort === 'rating' ? c.textInverse : c.star}
-                  />
-                }
-              />
-              <Chip
-                label={t('home.sortFees')}
-                active={sort === 'fees'}
-                onPress={() => setSort(sort === 'fees' ? null : 'fees')}
-                icon={
-                  <Ionicons
-                    name="trending-down-outline"
-                    size={14}
-                    color={sort === 'fees' ? c.textInverse : c.primary}
-                  />
-                }
-              />
-            </View>
-
-            <View style={[styles.segment, { borderColor: c.border, backgroundColor: c.surface }]}>
-              <SegBtn
-                icon="list"
-                label={t('home.viewList')}
-                active={viewMode === 'list'}
-                onPress={() => setViewMode('list')}
-                c={c}
-              />
-              <SegBtn
-                icon="map"
-                label={t('home.viewMap')}
-                active={viewMode === 'map'}
-                onPress={() => setViewMode('map')}
-                c={c}
-              />
-            </View>
-
-            {showRail && viewMode === 'list' && (
-              <View style={styles.rail}>
-                <Text style={[styles.sectionTitle, { color: c.text }]}>
-                  {t('home.topRated')}
-                </Text>
-                <FlatList
-                  horizontal
-                  showsHorizontalScrollIndicator={false}
-                  data={topRated}
-                  keyExtractor={(s) => `top-${s.id}`}
-                  renderItem={({ item }) => <SchoolMiniCard school={item} />}
-                />
-              </View>
-            )}
-
-            <Text style={[styles.count, { color: c.textMuted }]}>
-              {showRail
-                ? t('home.allSchools')
-                : t('home.resultsCount', { count: results.length })}
-            </Text>
           </View>
-        }
-        ListEmptyComponent={
-          loading ? (
-            <View>
-              <SchoolCardSkeleton />
-              <SchoolCardSkeleton />
-              <SchoolCardSkeleton />
-            </View>
-          ) : viewMode === 'map' ? (
-            <View
-              style={[
-                styles.mapWrap,
-                { height: Math.max(360, winH * 0.62), borderColor: c.border },
-              ]}
-            >
-              <SchoolMap schools={results} gated={gated} />
-            </View>
-          ) : (
-            <View style={styles.empty}>
-              <Ionicons name="school-outline" size={36} color={c.textMuted} />
-              <Text style={[styles.emptyText, { color: c.textMuted }]}>
-                {t('home.noResults')}
-              </Text>
-            </View>
-          )
-        }
-      />
+        ) : (
+          <Pressable
+            style={[styles.primaryBtn, styles.cta, { backgroundColor: c.primary }]}
+            onPress={() => router.push('/plan/wizard')}
+          >
+            <Ionicons name="sparkles" size={18} color={c.textInverse} />
+            <Text style={[styles.primaryText, { color: c.textInverse }]}>Start my family plan</Text>
+          </Pressable>
+        )}
 
-      <PickerSheet
-        visible={sheet === 'curriculum'}
-        title={t('filter.curriculum')}
-        allLabel={t('filter.allCurricula')}
-        options={curricula}
-        selected={filter.curriculum}
-        onSelect={(v) => setFilter((f) => ({ ...f, curriculum: v as any }))}
-        onClose={() => setSheet(null)}
-      />
-      <PickerSheet
-        visible={sheet === 'area'}
-        title={t('filter.area')}
-        allLabel={t('filter.allAreas')}
-        options={areas}
-        selected={filter.area}
-        searchable
-        onSelect={(v) => setFilter((f) => ({ ...f, area: v }))}
-        onClose={() => setSheet(null)}
-      />
+        {/* How it works */}
+        <Text style={[styles.sectionTitle, { color: c.text }]}>How it works</Text>
+        <Step n={1} icon="location-outline" title="Tell us your situation" body="Where you work, your children, curriculum and budget." c={c} />
+        <Step n={2} icon="sparkles-outline" title="Get matched" body="We score every Dubai school on commute, cost, rating and your priorities." c={c} />
+        <Step n={3} icon="cash-outline" title="See the true cost" body="Tuition plus bus, books, uniform and activities — the real annual number." c={c} />
+
+        {/* What we factor in */}
+        <Text style={[styles.sectionTitle, { color: c.text }]}>What we factor in</Text>
+        <View style={styles.chips}>
+          {['Tuition & true cost', 'KHDA rating', 'Commute from work', 'Curriculum', 'Seat availability', 'Your priorities'].map((f) => (
+            <View key={f} style={[styles.chip, { backgroundColor: c.surface, borderColor: c.border }]}>
+              <Text style={[styles.chipText, { color: c.text }]}>{f}</Text>
+            </View>
+          ))}
+        </View>
+
+        <Pressable style={styles.browseLink} onPress={() => router.push('/browse')}>
+          <Text style={[styles.browseText, { color: c.primary }]}>or browse all schools</Text>
+          <Ionicons name="arrow-forward" size={16} color={c.primary} />
+        </Pressable>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
-function FilterButton({
+function Step({
+  n,
   icon,
-  label,
-  value,
-  onPress,
+  title,
+  body,
   c,
 }: {
+  n: number;
   icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value?: string;
-  onPress: () => void;
-  c: ThemeColors;
-}) {
-  const active = !!value;
-  return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.filterBtn,
-        {
-          borderColor: active ? c.primary : c.border,
-          backgroundColor: active ? c.primarySoft : c.surface,
-        },
-      ]}
-    >
-      <Ionicons name={icon} size={15} color={active ? c.primary : c.textMuted} />
-      <Text
-        numberOfLines={1}
-        style={[styles.filterBtnText, { color: active ? c.primary : c.text }]}
-      >
-        {value ?? label}
-      </Text>
-      <Ionicons name="chevron-down" size={15} color={active ? c.primary : c.textMuted} />
-    </Pressable>
-  );
-}
-
-function SegBtn({
-  icon,
-  label,
-  active,
-  onPress,
-  c,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  active: boolean;
-  onPress: () => void;
+  title: string;
+  body: string;
   c: ThemeColors;
 }) {
   return (
-    <Pressable
-      onPress={onPress}
-      style={[styles.seg, active && { backgroundColor: c.primary }]}
-    >
-      <Ionicons name={icon} size={15} color={active ? c.textInverse : c.textMuted} />
-      <Text
-        style={[styles.segText, { color: active ? c.textInverse : c.textMuted }]}
-      >
-        {label}
-      </Text>
-    </Pressable>
-  );
-}
-
-function GateCTA({
-  total,
-  teasers,
-  onSignIn,
-  c,
-}: {
-  total: number;
-  teasers: School[];
-  onSignIn: () => void;
-  c: ThemeColors;
-}) {
-  const { t } = useTranslation();
-  return (
-    <View style={styles.gateWrap}>
-      {/* Blurred-ish teaser: real cards faded out + non-interactive. */}
-      <View pointerEvents="none" style={styles.gateTeasers}>
-        {teasers.map((s) => (
-          <SchoolCard key={`teaser-${s.id}`} school={s} />
-        ))}
+    <View style={[styles.step, { backgroundColor: c.surface, borderColor: c.border }]}>
+      <View style={[styles.stepIcon, { backgroundColor: c.primarySoft }]}>
+        <Ionicons name={icon} size={20} color={c.primary} />
       </View>
-      <View
-        style={[styles.gateFade, { backgroundColor: c.bg }]}
-        pointerEvents="none"
-      />
-      <View style={[styles.gateCard, { backgroundColor: c.surface, borderColor: c.primary }]}>
-        <View style={[styles.gateIcon, { backgroundColor: c.primarySoft }]}>
-          <Ionicons name="lock-closed" size={24} color={c.primary} />
-        </View>
-        <Text style={[styles.gateTitle, { color: c.text }]}>
-          {t('gate.unlockTitle', { total })}
-        </Text>
-        <Text style={[styles.gateBody, { color: c.textMuted }]}>
-          {t('gate.unlockBody', { total })}
-        </Text>
-        <Pressable
-          style={[styles.gatePrimary, { backgroundColor: c.primary }]}
-          onPress={onSignIn}
-        >
-          <Text style={[styles.gatePrimaryText, { color: c.textInverse }]}>
-            {t('gate.createAccount')}
-          </Text>
-        </Pressable>
-        <Pressable onPress={onSignIn} style={styles.gateSecondary}>
-          <Text style={[styles.gateSecondaryText, { color: c.primary }]}>
-            {t('gate.signIn')}
-          </Text>
-        </Pressable>
+      <View style={{ flex: 1 }}>
+        <Text style={[styles.stepTitle, { color: c.text }]}>{title}</Text>
+        <Text style={[styles.stepBody, { color: c.textMuted }]}>{body}</Text>
       </View>
+      <Text style={[styles.stepNum, { color: c.surfaceAlt }]}>{n}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  listContent: { padding: spacing.lg, paddingTop: spacing.md },
-  header: { marginBottom: spacing.sm },
-  appName: { fontSize: font.tiny, fontWeight: '800', letterSpacing: 2 },
-  title: { fontSize: font.h1, fontWeight: '800', marginTop: 3, letterSpacing: -0.6 },
-  subtitle: { fontSize: font.small, marginTop: 6, marginBottom: spacing.lg, lineHeight: 19 },
-  search: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 13,
-    marginBottom: spacing.md,
-    ...shadow.soft,
-  },
-  searchInput: { flex: 1, fontSize: font.body, paddingVertical: 2 },
-  filterRow: { flexDirection: 'row', gap: spacing.sm },
-  filterBtn: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: radius.pill,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: 11,
-  },
-  filterBtnText: { flex: 1, fontSize: font.small, fontWeight: '600' },
-  sortRow: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.sm },
-  segment: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderRadius: radius.pill,
-    padding: 4,
-    marginTop: spacing.md,
-    gap: 4,
-  },
-  seg: {
-    flex: 1,
+  body: { padding: spacing.lg, paddingBottom: spacing.xxl },
+  eyebrow: { fontSize: font.tiny, fontWeight: '800', letterSpacing: 2, marginTop: spacing.sm },
+  hero: { fontSize: 32, lineHeight: 38, fontWeight: '800', letterSpacing: -0.7, marginTop: spacing.sm },
+  heroSub: { fontSize: font.body, lineHeight: 22, marginTop: spacing.md },
+  cta: { marginTop: spacing.xl },
+  primaryBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 9,
-    borderRadius: radius.pill,
-  },
-  segText: { fontSize: font.small, fontWeight: '700' },
-  mapWrap: {
-    borderWidth: 1,
-    borderRadius: radius.lg,
-    overflow: 'hidden',
-    marginTop: spacing.sm,
-  },
-  gateWrap: { position: 'relative', marginTop: spacing.xs },
-  gateTeasers: { opacity: 0.35 },
-  gateFade: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: '60%',
-    opacity: 0.6,
-  },
-  gateCard: {
-    position: 'absolute',
-    left: spacing.md,
-    right: spacing.md,
-    bottom: spacing.lg,
-    alignItems: 'center',
     gap: spacing.sm,
-    borderWidth: 2,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    ...shadow.lg,
-  },
-  gateIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: spacing.xs,
-  },
-  gateTitle: { fontSize: font.h3, fontWeight: '800', textAlign: 'center' },
-  gateBody: { fontSize: font.small, textAlign: 'center', lineHeight: 19 },
-  gatePrimary: {
-    alignSelf: 'stretch',
     borderRadius: radius.md,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.sm,
+    paddingVertical: spacing.lg,
   },
-  gatePrimaryText: { fontWeight: '800', fontSize: font.body },
-  gateSecondary: { paddingVertical: spacing.sm },
-  gateSecondaryText: { fontWeight: '700', fontSize: font.small },
-  rail: { marginTop: spacing.lg },
-  sectionTitle: { fontSize: font.h3, fontWeight: '700', marginBottom: spacing.md },
-  count: {
-    fontSize: font.small,
-    fontWeight: '700',
-    marginTop: spacing.lg,
+  primaryText: { fontSize: font.body, fontWeight: '800' },
+  ghostBtn: { width: 52, alignItems: 'center', justifyContent: 'center', borderWidth: 1.5, borderRadius: radius.md },
+  planCard: { borderWidth: 1.5, borderRadius: radius.lg, padding: spacing.lg, marginTop: spacing.xl, ...shadow.soft },
+  planCardLabel: { fontSize: font.tiny, fontWeight: '800', letterSpacing: 1.2 },
+  planCardSummary: { fontSize: font.h3, fontWeight: '800', marginTop: 6 },
+  planCardSub: { fontSize: font.small, marginTop: 2 },
+  planCardActions: { flexDirection: 'row', gap: spacing.sm, marginTop: spacing.lg },
+  sectionTitle: { fontSize: font.h2, fontWeight: '800', letterSpacing: -0.3, marginTop: spacing.xxl, marginBottom: spacing.md },
+  step: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    borderWidth: 1,
+    borderRadius: radius.md,
+    padding: spacing.lg,
     marginBottom: spacing.sm,
   },
-  empty: { alignItems: 'center', gap: spacing.md, marginTop: spacing.xxl },
-  emptyText: { fontSize: font.body, textAlign: 'center' },
+  stepIcon: { width: 42, height: 42, borderRadius: radius.md, alignItems: 'center', justifyContent: 'center' },
+  stepTitle: { fontSize: font.body, fontWeight: '700' },
+  stepBody: { fontSize: font.small, marginTop: 2, lineHeight: 18 },
+  stepNum: { fontSize: 34, fontWeight: '800' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
+  chip: { borderWidth: 1, borderRadius: radius.pill, paddingHorizontal: spacing.md, paddingVertical: spacing.sm },
+  chipText: { fontSize: font.small, fontWeight: '600' },
+  browseLink: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6, marginTop: spacing.xxl },
+  browseText: { fontSize: font.body, fontWeight: '700' },
 });

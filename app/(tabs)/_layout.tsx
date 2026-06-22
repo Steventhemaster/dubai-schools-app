@@ -23,7 +23,16 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: t('tabs.schools'),
+          title: t('tabs.plan'),
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="browse"
+        options={{
+          title: t('tabs.browse'),
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? 'school' : 'school-outline'} size={size} color={color} />
           ),

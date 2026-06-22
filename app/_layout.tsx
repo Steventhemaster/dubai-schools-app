@@ -7,6 +7,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import '@/i18n'; // initialise i18next before any screen renders
 import { SavedSchoolsProvider } from '@/components/useSavedSchools';
 import { AuthProvider } from '@/lib/auth';
+import { PlanProvider } from '@/lib/usePlan';
 import { useTheme } from '@/theme';
 
 export default function RootLayout() {
@@ -15,6 +16,7 @@ export default function RootLayout() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <AuthProvider>
+        <PlanProvider>
         <SavedSchoolsProvider>
           <StatusBar style={dark ? 'light' : 'dark'} />
           <Stack
@@ -38,8 +40,11 @@ export default function RootLayout() {
             />
             <Stack.Screen name="legal/privacy" options={{ title: '' }} />
             <Stack.Screen name="legal/terms" options={{ title: '' }} />
+            <Stack.Screen name="plan/wizard" options={{ title: '', presentation: 'modal' }} />
+            <Stack.Screen name="plan/results" options={{ title: '' }} />
           </Stack>
         </SavedSchoolsProvider>
+        </PlanProvider>
         </AuthProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>

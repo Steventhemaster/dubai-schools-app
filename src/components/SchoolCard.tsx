@@ -114,6 +114,8 @@ export function SchoolMiniCard({ school }: { school: School }) {
   const router = useRouter();
   const { colors: c } = useTheme();
   const { t } = useTranslation();
+  const { enabled, session } = useAuth();
+  const gated = enabled && !session;
   const fee = feeRangeLabel(school.feeMinAed, school.feeMaxAed);
   return (
     <Pressable
@@ -140,11 +142,15 @@ export function SchoolMiniCard({ school }: { school: School }) {
         <Text style={[styles.miniRating, { color: c.text }]}>
           {school.avgRating.toFixed(1)}
         </Text>
-        {fee && (
+        {gated ? (
+          <Text style={[styles.miniFee, { color: c.textMuted }]} numberOfLines={1}>
+            · 🔒
+          </Text>
+        ) : fee ? (
           <Text style={[styles.miniFee, { color: c.textMuted }]} numberOfLines={1}>
             · {t('common.aed')} {fee}
           </Text>
-        )}
+        ) : null}
       </View>
     </Pressable>
   );

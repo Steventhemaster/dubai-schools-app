@@ -2,6 +2,8 @@
   "app": { "name": "Dubai Schools" },
   "tabs": {
     "schools": "Schools",
+    "plan": "Plan",
+    "browse": "Browse",
     "saved": "Saved",
     "profile": "Profile"
   },
