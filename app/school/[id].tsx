@@ -29,7 +29,7 @@ import { schoolSummary } from '@/lib/summary';
 import { getSchool, listReviews, reportReview } from '@/lib/repository';
 import type { Review, School } from '@/lib/types';
 import { feeRangeLabel, formatAed, relativeDate } from '@/lib/format';
-import { font, radius, spacing, useTheme, type ThemeColors } from '@/theme';
+import { font, radius, shadow, spacing, useTheme, type ThemeColors } from '@/theme';
 
 type Tab = 'overview' | 'admissions' | 'fees' | 'reviews';
 
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
   content: { padding: spacing.lg, paddingBottom: spacing.xxl },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
 
-  name: { fontSize: font.h1, fontWeight: '800' },
+  name: { fontSize: font.h1, fontWeight: '800', letterSpacing: -0.6, lineHeight: 36 },
   areaRow: { flexDirection: 'row', alignItems: 'center', gap: 4, marginTop: spacing.xs },
   area: { fontSize: font.body },
   ratingRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginTop: spacing.sm },
@@ -660,6 +660,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: 1,
+    ...shadow.lg,
   },
   saveBtn: {
     width: 50,

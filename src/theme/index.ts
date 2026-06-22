@@ -102,28 +102,46 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 22,
+  sm: 10,
+  md: 14,
+  lg: 20,
+  xl: 28,
   pill: 999,
 } as const;
 
 export const font = {
-  h1: 28,
-  h2: 20,
+  h1: 30,
+  h2: 22,
   h3: 17,
   body: 15,
   small: 13,
   tiny: 11,
 } as const;
 
+// Soft, diffuse shadows read as modern; heavy short shadows look dated.
 export const shadow = {
-  card: {
-    shadowColor: '#000',
+  // Subtle lift for chips, inputs, small surfaces.
+  soft: {
+    shadowColor: '#0B1A2E',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.08,
+    shadowOpacity: 0.05,
     shadowRadius: 8,
-    elevation: 2,
+    elevation: 1,
+  },
+  // Default card elevation — large blur, low opacity, tinted.
+  card: {
+    shadowColor: '#0B1A2E',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.07,
+    shadowRadius: 20,
+    elevation: 3,
+  },
+  // Floating elements: bottom sheets, sticky CTA, gate card.
+  lg: {
+    shadowColor: '#0B1A2E',
+    shadowOffset: { width: 0, height: 14 },
+    shadowOpacity: 0.12,
+    shadowRadius: 32,
+    elevation: 8,
   },
 } as const;
