@@ -9,6 +9,7 @@ export interface ThemeColors {
   primary: string;
   primaryDark: string;
   primarySoft: string;
+  primaryText: string;
   accent: string;
   accentSoft: string;
   accentText: string;
@@ -20,44 +21,54 @@ export interface ThemeColors {
   bg: string;
   surface: string;
   surfaceAlt: string;
+  surfaceSunken: string;
   text: string;
   textMuted: string;
+  textSubtle: string;
   textInverse: string;
   border: string;
+  borderStrong: string;
   star: string;
 }
 
+// Neutral-first palette: cool greys (no yellow cast) + deep teal-blue brand;
+// gold reserved for stars / rare accents only.
 export const lightColors: ThemeColors = {
-  primary: '#0A3D62',
-  primaryDark: '#072A45',
-  primarySoft: '#E4EBF2',
-  accent: '#D4A017',
-  accentSoft: '#F5E6C8',
-  accentText: '#7A5B00',
+  primary: '#0E4F66',
+  primaryDark: '#0A3C4E',
+  primarySoft: '#E1EEF2',
+  primaryText: '#0A3C4E',
+  accent: '#C8901A',
+  accentSoft: '#F7ECD2',
+  accentText: '#7A5B12',
   success: '#1E8E5A',
-  successSoft: '#E3F3EB',
-  danger: '#C0392B',
-  dangerSoft: '#FBE7E5',
-  warning: '#E67E22',
+  successSoft: '#E4F4EC',
+  danger: '#D14438',
+  dangerSoft: '#FBE9E7',
+  warning: '#E08A1E',
 
-  bg: '#FBF9F4',
+  bg: '#F6F7F9',
   surface: '#FFFFFF',
-  surfaceAlt: '#F2EEE5',
+  surfaceAlt: '#EEF1F4',
+  surfaceSunken: '#ECEEF2',
 
-  text: '#1A1A2E',
-  textMuted: '#6B7280',
+  text: '#10151C',
+  textMuted: '#5C6672',
+  textSubtle: '#8A929C',
   textInverse: '#FFFFFF',
 
-  border: '#E4DED1',
-  star: '#F2B01E',
+  border: '#E5E8EC',
+  borderStrong: '#D4D9E0',
+  star: '#F5A623',
 };
 
 export const darkColors: ThemeColors = {
-  primary: '#3D7CB0', // lighter marine for contrast on dark surfaces
-  primaryDark: '#0A3D62',
-  primarySoft: '#16293C',
-  accent: '#E0B43A',
-  accentSoft: '#332B14',
+  primary: '#4FB3CE', // teal, lightened for dark surfaces
+  primaryDark: '#2E8AA3',
+  primarySoft: '#12303A',
+  primaryText: '#9FD9E6',
+  accent: '#E0AE3C',
+  accentSoft: '#2C2613',
   accentText: '#E5C26B',
   success: '#3CC488',
   successSoft: '#10291C',
@@ -65,16 +76,19 @@ export const darkColors: ThemeColors = {
   dangerSoft: '#321A18',
   warning: '#E89B4B',
 
-  bg: '#0E1116',
-  surface: '#161C24',
-  surfaceAlt: '#1F2731',
+  bg: '#0B0E13',
+  surface: '#151A21',
+  surfaceAlt: '#1E242D',
+  surfaceSunken: '#11161C',
 
-  text: '#E8EAED',
-  textMuted: '#98A1AD',
+  text: '#EAEDF1',
+  textMuted: '#9AA4B0',
+  textSubtle: '#6B7480',
   textInverse: '#FFFFFF',
 
-  border: '#2A333F',
-  star: '#F2B01E',
+  border: '#273039',
+  borderStrong: '#39434E',
+  star: '#F5B53A',
 };
 
 export interface Theme {
@@ -102,10 +116,10 @@ export const spacing = {
 } as const;
 
 export const radius = {
-  sm: 10,
-  md: 14,
-  lg: 20,
-  xl: 28,
+  sm: 8,
+  md: 12,
+  lg: 16,
+  xl: 22,
   pill: 999,
 } as const;
 
@@ -120,28 +134,29 @@ export const font = {
 
 // Soft, diffuse shadows read as modern; heavy short shadows look dated.
 export const shadow = {
-  // Subtle lift for chips, inputs, small surfaces.
+  // 2026 direction: cards use hairline borders, not shadows. Reserve shadow
+  // for genuinely floating UI. Cool-ink tint, very low opacity.
   soft: {
-    shadowColor: '#0B1A2E',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
+    shadowColor: '#0B0E13',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 6,
     elevation: 1,
   },
-  // Default card elevation — large blur, low opacity, tinted.
+  // Hover/pressed lift on web — not used for resting cards.
   card: {
-    shadowColor: '#0B1A2E',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.07,
-    shadowRadius: 20,
-    elevation: 3,
+    shadowColor: '#0B0E13',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 1,
   },
-  // Floating elements: bottom sheets, sticky CTA, gate card.
+  // Floating elements only: bottom sheets, sticky CTA, gate card.
   lg: {
-    shadowColor: '#0B1A2E',
-    shadowOffset: { width: 0, height: 14 },
-    shadowOpacity: 0.12,
-    shadowRadius: 32,
-    elevation: 8,
+    shadowColor: '#0B0E13',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.14,
+    shadowRadius: 28,
+    elevation: 10,
   },
 } as const;

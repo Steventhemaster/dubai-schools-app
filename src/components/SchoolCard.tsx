@@ -4,7 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import type { School } from '@/lib/types';
-import { font, radius, shadow, spacing, useTheme } from '@/theme';
+import { font, radius, spacing, useTheme } from '@/theme';
 import { feeRangeLabel } from '@/lib/format';
 import { schoolSummaryShort } from '@/lib/summary';
 import { useAuth } from '@/lib/auth';
@@ -165,9 +165,9 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: radius.lg,
     padding: 18,
-    marginBottom: spacing.md,
+    marginBottom: 14,
     borderWidth: 1,
-    ...shadow.card,
+    // E1: hairline border, no shadow (modern, flat-but-defined).
   },
   pressed: { opacity: 0.96, transform: [{ scale: 0.985 }] },
   headerRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
