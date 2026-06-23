@@ -12,16 +12,58 @@ export interface OfficeLocation {
   label: string;
   lat: number;
   lng: number;
+  group: string; // zone, used to section the picker
 }
 
+// Major Dubai employment hubs (plus the neighbouring emirates many commute
+// to). Grouped by zone so the picker stays scannable. Coordinates are hub
+// centroids — good enough for estimated drive-time, not turn-by-turn.
 export const OFFICES: OfficeLocation[] = [
-  { id: 'difc', label: 'DIFC', lat: 25.211, lng: 55.2796 },
-  { id: 'downtown', label: 'Downtown Dubai', lat: 25.1972, lng: 55.2744 },
-  { id: 'business-bay', label: 'Business Bay', lat: 25.185, lng: 55.265 },
-  { id: 'internet-city', label: 'Dubai Internet City', lat: 25.095, lng: 55.161 },
-  { id: 'media-city', label: 'Dubai Media City', lat: 25.095, lng: 55.156 },
-  { id: 'dso', label: 'Dubai Silicon Oasis', lat: 25.1216, lng: 55.3815 },
-  { id: 'abu-dhabi', label: 'Abu Dhabi', lat: 24.4539, lng: 54.3773 },
+  // Central / Sheikh Zayed Road corridor
+  { id: 'difc', label: 'DIFC', lat: 25.211, lng: 55.2796, group: 'Central (SZR corridor)' },
+  { id: 'downtown', label: 'Downtown Dubai', lat: 25.1972, lng: 55.2744, group: 'Central (SZR corridor)' },
+  { id: 'business-bay', label: 'Business Bay', lat: 25.185, lng: 55.265, group: 'Central (SZR corridor)' },
+  { id: 'dwtc', label: 'World Trade Centre / SZR', lat: 25.2253, lng: 55.287, group: 'Central (SZR corridor)' },
+  { id: 'd3', label: 'Dubai Design District (d3)', lat: 25.187, lng: 55.297, group: 'Central (SZR corridor)' },
+  { id: 'dhcc', label: 'Dubai Healthcare City', lat: 25.231, lng: 55.323, group: 'Central (SZR corridor)' },
+  { id: 'meydan', label: 'Meydan', lat: 25.162, lng: 55.3, group: 'Central (SZR corridor)' },
+
+  // Tecom / Marina belt (south-west coast)
+  { id: 'internet-city', label: 'Dubai Internet City', lat: 25.095, lng: 55.161, group: 'Tecom / Marina belt' },
+  { id: 'media-city', label: 'Dubai Media City', lat: 25.095, lng: 55.156, group: 'Tecom / Marina belt' },
+  { id: 'knowledge-park', label: 'Dubai Knowledge Park', lat: 25.101, lng: 55.162, group: 'Tecom / Marina belt' },
+  { id: 'barsha-heights', label: 'Barsha Heights (TECOM)', lat: 25.1, lng: 55.18, group: 'Tecom / Marina belt' },
+  { id: 'jlt', label: 'JLT (Jumeirah Lake Towers)', lat: 25.069, lng: 55.141, group: 'Tecom / Marina belt' },
+  { id: 'dubai-marina', label: 'Dubai Marina', lat: 25.08, lng: 55.14, group: 'Tecom / Marina belt' },
+
+  // Al Quoz / motor & sports cluster (mid)
+  { id: 'al-quoz', label: 'Al Quoz', lat: 25.14, lng: 55.23, group: 'Al Quoz / Motor cluster' },
+  { id: 'science-park', label: 'Dubai Science Park', lat: 25.103, lng: 55.233, group: 'Al Quoz / Motor cluster' },
+  { id: 'production-city', label: 'Dubai Production City (IMPZ)', lat: 25.034, lng: 55.19, group: 'Al Quoz / Motor cluster' },
+  { id: 'studio-city', label: 'Dubai Studio City', lat: 25.03, lng: 55.23, group: 'Al Quoz / Motor cluster' },
+  { id: 'sports-city', label: 'Dubai Sports City', lat: 25.038, lng: 55.218, group: 'Al Quoz / Motor cluster' },
+  { id: 'motor-city', label: 'Motor City', lat: 25.045, lng: 55.238, group: 'Al Quoz / Motor cluster' },
+
+  // Silicon Oasis / Academic (east)
+  { id: 'dso', label: 'Dubai Silicon Oasis', lat: 25.1216, lng: 55.3815, group: 'Silicon Oasis / Academic' },
+  { id: 'outsource-city', label: 'Dubai Outsource City', lat: 25.123, lng: 55.392, group: 'Silicon Oasis / Academic' },
+  { id: 'academic-city', label: 'Dubai Academic City', lat: 25.109, lng: 55.413, group: 'Silicon Oasis / Academic' },
+
+  // Airport / Deira (north-east)
+  { id: 'dafza', label: 'DAFZA (Airport Free Zone)', lat: 25.265, lng: 55.357, group: 'Airport / Deira' },
+  { id: 'dxb-airport', label: 'Dubai Int’l Airport (DXB)', lat: 25.253, lng: 55.365, group: 'Airport / Deira' },
+  { id: 'festival-city', label: 'Dubai Festival City', lat: 25.222, lng: 55.349, group: 'Airport / Deira' },
+  { id: 'deira', label: 'Deira / Dubai Creek', lat: 25.271, lng: 55.314, group: 'Airport / Deira' },
+  { id: 'bur-dubai', label: 'Bur Dubai', lat: 25.258, lng: 55.296, group: 'Airport / Deira' },
+
+  // Southern free zones (far south-west)
+  { id: 'jafza', label: 'JAFZA (Jebel Ali Free Zone)', lat: 25.0, lng: 55.07, group: 'Southern free zones' },
+  { id: 'dip', label: 'Dubai Investment Park (DIP)', lat: 24.97, lng: 55.18, group: 'Southern free zones' },
+  { id: 'dubai-south', label: 'Dubai South / Expo City', lat: 24.896, lng: 55.161, group: 'Southern free zones' },
+
+  // Neighbouring emirates
+  { id: 'sharjah', label: 'Sharjah', lat: 25.346, lng: 55.421, group: 'Other emirates' },
+  { id: 'abu-dhabi', label: 'Abu Dhabi', lat: 24.4539, lng: 54.3773, group: 'Other emirates' },
 ];
 
 // ── Budget bands (annual tuition, AED) ─────────────────────────────────────

@@ -100,15 +100,24 @@ export default function WizardScreen() {
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         {step === 0 && (
           <Step title="Where do you work?" subtitle="We'll estimate commute from here." c={c}>
-            {OFFICES.map((o) => (
-              <SelectRow
-                key={o.id}
-                label={o.label}
-                active={officeId === o.id}
-                onPress={() => setOfficeId(o.id)}
-                c={c}
-              />
-            ))}
+            {OFFICES.map((o, i) => {
+              const newGroup = i === 0 || OFFICES[i - 1].group !== o.group;
+              return (
+                <React.Fragment key={o.id}>
+                  {newGroup && (
+                    <Text style={[styles.groupHeader, { color: c.textSubtle }]}>
+                      {o.group.toUpperCase()}
+                    </Text>
+                  )}
+                  <SelectRow
+                    label={o.label}
+                    active={officeId === o.id}
+                    onPress={() => setOfficeId(o.id)}
+                    c={c}
+                  />
+                </React.Fragment>
+              );
+            })}
           </Step>
         )}
 
@@ -285,6 +294,13 @@ const styles = StyleSheet.create({
   body: { padding: spacing.lg, paddingBottom: spacing.xxl },
   title: { fontSize: font.h1, fontWeight: '800', letterSpacing: -0.5 },
   subtitle: { fontSize: font.body, marginTop: 6, marginBottom: spacing.xl, lineHeight: 21 },
+  groupHeader: {
+    fontSize: font.tiny,
+    fontWeight: '800',
+    letterSpacing: 1.2,
+    marginTop: spacing.lg,
+    marginBottom: spacing.sm,
+  },
   selectRow: {
     flexDirection: 'row',
     alignItems: 'center',
