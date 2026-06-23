@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import '@/lib/webFont'; // apply Plus Jakarta Sans globally on web (before screens)
 import '@/i18n'; // initialise i18next before any screen renders
 import { SavedSchoolsProvider } from '@/components/useSavedSchools';
 import { AuthProvider } from '@/lib/auth';
